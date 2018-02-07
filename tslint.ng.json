@@ -117,13 +117,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "msu-root",
+      "msu",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "msu-root",
+      "msu",
       "kebab-case"
     ],
     "use-input-property-decorator": true,
