@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { TimeseriesData } from 'app/shared/timeseries.interface';
 
 @Component({
@@ -6,10 +6,16 @@ import { TimeseriesData } from 'app/shared/timeseries.interface';
   styleUrls: ['./graph.component.scss'],
   templateUrl: './graph.component.html',
 })
-export class GraphComponent {
-  @Input() public data?: TimeseriesData;
+export class GraphComponent implements OnChanges {
+  @Input() public data?: TimeseriesData[];
+
+  public displayData: TimeseriesData[] = [];
 
   public constructor() {
     // Nothing to do.
+  }
+
+  public ngOnChanges(): void {
+    this.displayData = [...(this.data || [])];
   }
 }

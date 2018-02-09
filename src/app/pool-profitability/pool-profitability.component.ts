@@ -10,11 +10,37 @@ import { Observable } from 'rxjs/Observable';
 
 import { ALGORITHMS, POOLS, RIG_PROFILE } from 'app/shared/configurations';
 import {
-  MiningPoolAlgorithmProfitabilityRecord,
-  MiningPoolAlgorithmProfitabilityRollupRecord,
+  PoolAlgoProfitabilityRecord,
+  PoolAlgoProfitabilityRollupRecord,
 } from 'app/shared/firebase.interface';
 import { TimeseriesData } from 'app/shared/timeseries.interface';
 import { Dictionary } from 'lodash';
+
+type TimeseriesDataWithKeys = TimeseriesData & { algo: string, pool: string };
+
+function convertMinuteData(
+  multiplier: number,
+): (data: PoolAlgoProfitabilityRecord) => TimeseriesData['series'][0] {
+  return (r) => {
+    return {
+      name: new Date((r.timestamp || 0) * 1000),
+      value: (r.amount.amount || 0) * (multiplier || 0),
+    };
+  };
+}
+
+function convertRollupData(
+  multiplier: number,
+): (data: PoolAlgoProfitabilityRollupRecord) => TimeseriesData['series'][0] {
+  return (r) => {
+    return {
+      max: r.max.amount * multiplier,
+      min: r.min.amount * multiplier,
+      name: new Date((r.timestamp || 0) * 1000),
+      value: (r.sum.amount / r.count) * multiplier,
+    };
+  };
+}
 
 @Component({
   selector: 'msu-pool-profitability',
@@ -25,9 +51,9 @@ export class PoolProfitabilityComponent {
   public readonly pools: typeof POOLS = POOLS;
   public readonly algos: typeof ALGORITHMS = ALGORITHMS;
 
-  public readonly data: Observable<TimeseriesData[]>;
-  public readonly hourlyData: Observable<TimeseriesData[]>;
-  public readonly dailyData: Observable<TimeseriesData[]>;
+  public readonly data: Observable<TimeseriesDataWithKeys[]>;
+  public readonly hourlyData: Observable<TimeseriesDataWithKeys[]>;
+  public readonly dailyData: Observable<TimeseriesDataWithKeys[]>;
 
   public filterForm: FormGroup;
 
@@ -55,116 +81,87 @@ export class PoolProfitabilityComponent {
       ),
     });
 
-    // tslint:disable-next-line:no-any
-    const filterFn = ([results, filter]: [TimeseriesData[], any]) => {
-      return results.filter(
-        (result) => {
-          const keys = result.name.split(' - ');
-          return filter.pools[keys[0]] && filter.algos[keys[1]];
+    this.data = this.buildFilterChain(
+      (p, a) => this.watchProfitability(p, a, 'minute', convertMinuteData, 120),
+    );
+    this.hourlyData = this.buildFilterChain(
+      (p, a) => this.watchProfitability(p, a, 'hour', convertRollupData, 72),
+    );
+    this.dailyData = this.buildFilterChain(
+      (p, a) => this.watchProfitability(p, a, 'day', convertRollupData, 30),
+    );
+  }
+
+  private buildFilterChain(
+    source: (pool: string, algo: string) => Observable<TimeseriesDataWithKeys>,
+  ): Observable<TimeseriesDataWithKeys[]> {
+    return Observable.combineLatest(
+      ..._.flatten(
+        POOLS.map((pool) => ALGORITHMS.map((algo) => source(pool, algo))),
+      ),
+    )
+      .debounceTime(1000)
+      .combineLatest(
+        this.filterForm.valueChanges
+          .startWith(this.filterForm.value),
+      )
+      // tslint:disable-next-line:no-any
+      .map(([results, filter]: [TimeseriesDataWithKeys[], any]) => {
+        return results.filter(
+          (result) => {
+            return result.series.length > 0 &&
+              filter.pools[result.pool] &&
+              filter.algos[result.algo];
+          },
+        );
+      });
+  }
+
+  private watchProfitability<
+    T extends PoolAlgoProfitabilityRecord | PoolAlgoProfitabilityRollupRecord
+  >(
+    pool: string,
+    algo: string,
+    granularity: 'day' | 'minute' | 'hour',
+    convertFn: (multiplier: number) => (data: T) => TimeseriesDataWithKeys['series'][0],
+    limit = 120,
+  ): Observable<TimeseriesDataWithKeys> {
+    let limitMinutes = limit;
+    switch (granularity) {
+      case 'day':
+        limitMinutes = limit * 24 * 60;
+        break;
+      case 'hour':
+        limitMinutes = limit * 60;
+        break;
+      default:
+    }
+
+    const multiplier = this.multiplier(pool, algo);
+
+    return this.db.list<T>(
+      `/v2/pool/${pool}/${algo}/profitability/per-${granularity}`,
+      (query) => query.limitToLast(limit),
+    )
+      .valueChanges()
+      .map(
+        (data): TimeseriesDataWithKeys => {
+          const timeLimit = (Date.now() - limitMinutes * 60 * 1000);
+
+          return {
+            algo,
+            name: `${pool} - ${algo}`,
+            pool,
+            series: data.map(convertFn(multiplier))
+              .filter(p => {
+                if (typeof p.name === 'string') {
+                  return true;
+                }
+                return p.name.getTime() > timeLimit;
+              }),
+          };
         },
       );
-    };
-
-    this.data = Observable.combineLatest(
-      ..._.flatten(
-        POOLS.map(
-          (pool) => ALGORITHMS.map((algo) => this.watchProfitabilityMinutes(pool, algo)),
-        ),
-      ),
-    )
-      .debounceTime(1000)
-      .combineLatest(
-        this.filterForm.valueChanges
-          .startWith(this.filterForm.value),
-      )
-      .map(filterFn);
-
-    this.hourlyData = Observable.combineLatest(
-      ..._.flatten(
-        POOLS.map(
-          (pool) => ALGORITHMS.map((algo) => this.watchProfitabilityRollup(pool, algo, 'hour')),
-        ),
-      ),
-    )
-      .debounceTime(1000)
-      .combineLatest(
-        this.filterForm.valueChanges
-          .startWith(this.filterForm.value),
-      )
-      .map(filterFn);
-
-    this.dailyData = Observable.combineLatest(
-      ..._.flatten(
-        POOLS.map(
-          (pool) => ALGORITHMS.map((algo) => this.watchProfitabilityRollup(pool, algo, 'day')),
-        ),
-      ),
-    )
-      .debounceTime(1000)
-      .combineLatest(
-        this.filterForm.valueChanges
-          .startWith(this.filterForm.value),
-      )
-      .map(filterFn);
-  }
-
-  private watchProfitabilityMinutes(
-    pool: string,
-    algo: string,
-    limitMinutes = 120,
-  ): Observable<TimeseriesData> {
-    const multiplier = this.multiplier(pool, algo);
-
-    return this.db.list<MiningPoolAlgorithmProfitabilityRecord>(
-      `/v2/pool/${pool}/${algo}/profitability/per-minute`,
-      (query) => query.limitToLast(120),
-    )
-      .valueChanges()
-      .map(
-        (data): TimeseriesData => {
-          const now = Date.now();
-
-          return {
-            name: `${pool} - ${algo}`,
-            series: data.map(r => {
-              return {
-                name: new Date(r.timestamp * 1000),
-                value: r.amount.amount * multiplier,
-              };
-            })
-              .filter(set => set.name.getTime() > (now - limitMinutes * 60 * 1000)),
-          };
-        },
-    );
-  }
-
-  private watchProfitabilityRollup(
-    pool: string,
-    algo: string,
-    rollup: string,
-  ): Observable<TimeseriesData> {
-    const multiplier = this.multiplier(pool, algo);
-
-    return this.db.list<MiningPoolAlgorithmProfitabilityRollupRecord>(
-      `/v2/pool/${pool}/${algo}/profitability/per-${rollup}`,
-      (query) => query.limitToLast(72),
-    )
-      .valueChanges()
-      .map(
-        (data): TimeseriesData => {
-          return {
-            name: `${pool} - ${algo}`,
-            series: data.map(r => {
-              return {
-                max: r.max.amount * multiplier,
-                min: r.min.amount * multiplier,
-                name: new Date(r.timestamp * 1000),
-                value: (r.sum.amount / r.count) * multiplier,
-              };
-            }),
-          };
-        },
-    );
   }
 
   private multiplier(pool: string, algo: string): number {

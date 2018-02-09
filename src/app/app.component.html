@@ -1,13 +1,20 @@
 <mat-toolbar color="primary">
-  <span>Miner Stats</span>
+  <span>
+    <a mat-button [routerLink]=""><h1>Miner Stats</h1></a>
+  </span>
 
   <!-- This fills the remaining space of the current row -->
   <span class="fill"></span>
 
   <span>
     <ng-container *ngIf="afAuth.authState | async as user; else showLogin">
-      {{ user.displayName }}
-      <button mat-button (click)="logout()">Logout</button>
+      <button
+        mat-button
+        matTooltip="Logout"
+        (click)="logout()"
+      >
+        Logged in as {{ user.displayName }}
+      </button>
     </ng-container>
     <ng-template #showLogin>
       <button mat-button (click)="login()">Login</button>

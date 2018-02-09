@@ -5,7 +5,10 @@ import {
   MatCheckboxModule,
   MatProgressSpinnerModule,
   MatSpinner,
+  MatTableModule,
+  MatTabsModule,
   MatToolbarModule,
+  MatTooltipModule,
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -55,7 +58,10 @@ const APP_ROUTES: Routes = [
     MatCardModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    MatTabsModule,
     MatToolbarModule,
+    MatTooltipModule,
+    MatTableModule,
     NgxChartsModule,
   ],
   providers: [],
