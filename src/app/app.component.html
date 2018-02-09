@@ -1,20 +1,24 @@
-<div *ngIf="afAuth.authState | async as user; else showLogin">
-  <h1>Hello {{ user.displayName }}!</h1>
-  <button (click)="logout()">Logout</button>
+<mat-toolbar color="primary">
+  <span>Miner Stats</span>
 
-  <ng-container *ngIf="data | async as loadedData">
-    <msu-graph [data]="loadedData"></msu-graph>
-  </ng-container>
+  <!-- This fills the remaining space of the current row -->
+  <span class="fill"></span>
 
-  <ng-container *ngIf="hourlyData | async as loadedData">
-    <msu-graph [data]="loadedData"></msu-graph>
-  </ng-container>
+  <span>
+    <ng-container *ngIf="afAuth.authState | async as user; else showLogin">
+      {{ user.displayName }}
+      <button mat-button (click)="logout()">Logout</button>
+    </ng-container>
+    <ng-template #showLogin>
+      <button mat-button (click)="login()">Login</button>
+    </ng-template>
+  </span>
+</mat-toolbar>
 
-  <ng-container *ngIf="dailyData | async as loadedData">
-    <msu-graph [data]="loadedData"></msu-graph>
-  </ng-container>
-</div>
-<ng-template #showLogin>
-  <p>Please login.</p>
-  <button (click)="login()">Login with Google</button>
+<ng-container *ngIf="afAuth.authState | async; else directToLogin">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<ng-template #directToLogin>
+  <h1>Please login to view data.</h1>
 </ng-template>

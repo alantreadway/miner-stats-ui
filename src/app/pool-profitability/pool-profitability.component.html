@@ -1,0 +1,69 @@
+<form [formGroup]="filterForm">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title><h2>Filters</h2></mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <section [formArrayName]="'pools'">
+        <h3>Pools</h3>
+        <mat-checkbox
+          *ngFor="let pool of pools"
+          [formControlName]="pool"
+        >
+          {{ pool }}
+        </mat-checkbox>
+      </section>
+      <section [formArrayName]="'algos'">
+        <h3>Algorithms</h3>
+        <mat-checkbox
+          *ngFor="let algo of algos"
+          [formControlName]="algo"
+        >
+          {{ algo }}
+        </mat-checkbox>
+      </section>
+    </mat-card-content>
+  </mat-card>
+</form>
+
+<mat-card class="graph-card">
+  <mat-card-header>
+    <mat-card-title><h2>Last 2 hours (per minute)</h2></mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="graph-container">
+    <ng-container *ngIf="data | async as loadedData; else loading">
+      <msu-graph [data]="loadedData"></msu-graph>
+    </ng-container>
+    <ng-template #loading>
+      <mat-spinner></mat-spinner>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="graph-card">
+  <mat-card-header>
+    <mat-card-title><h2>Last 2 days (per hour)</h2></mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="graph-container">
+    <ng-container *ngIf="hourlyData | async as loadedData; else loading">
+      <msu-graph [data]="loadedData"></msu-graph>
+    </ng-container>
+    <ng-template #loading>
+      <mat-spinner></mat-spinner>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="graph-card">
+  <mat-card-header>
+    <mat-card-title><h2>Last 30 days (per day)</h2></mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="graph-container">
+    <ng-container *ngIf="dailyData | async as loadedData; else loading">
+      <msu-graph [data]="loadedData"></msu-graph>
+    </ng-container>
+    <ng-template #loading>
+      <mat-spinner></mat-spinner>
+    </ng-template>
+  </mat-card-content>
+</mat-card>

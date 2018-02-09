@@ -1,22 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
-
-export interface TimeseriesData {
-  name: string;
-  series: {
-    value: number;
-    min?: number;
-    max?: number;
-    name: string | Date;
-  }[];
-}
+import { TimeseriesData } from 'app/shared/timeseries.interface';
 
 @Component({
   selector: 'msu-graph',
-  styleUrls: ['./graph.component.css'],
+  styleUrls: ['./graph.component.scss'],
   templateUrl: './graph.component.html',
 })
 export class GraphComponent {
-  @Input() public data: TimeseriesData;
+  @Input() public data?: TimeseriesData;
 
   public constructor() {
     // Nothing to do.
