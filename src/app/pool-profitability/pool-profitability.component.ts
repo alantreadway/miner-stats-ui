@@ -8,15 +8,16 @@ import { Observable } from 'rxjs/Observable';
 import { BREAKPOINTS, ObservableMedia } from '@angular/flex-layout';
 import { PageEvent } from '@angular/material';
 import { ALGORITHMS, POOLS, RIG_PROFILE } from 'app/shared/configurations';
+import { MetricsService, PoolAlgoData } from 'app/shared/metrics.service';
 import {
   PoolAlgoRecord,
   PoolAlgoRollupRecord,
-} from 'app/shared/firebase.interface';
-import { MetricsService, PoolAlgoData } from 'app/shared/metrics.service';
+} from 'app/shared/schema';
 import { TimeseriesData } from 'app/shared/timeseries.interface';
 import { Dictionary } from 'lodash';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
+import { RigProfilesService } from '../shared/rig-profiles.service';
 
 interface TableData {
   name: string;
@@ -54,6 +55,7 @@ export class PoolProfitabilityComponent {
 
   public constructor(
     private readonly metrics: MetricsService,
+    private readonly rigProfiles: RigProfilesService,
     private observableMedia: ObservableMedia,
   ) {
     this.graphSize = this.observableMedia.asObservable()
@@ -87,6 +89,7 @@ export class PoolProfitabilityComponent {
       this.metrics.getProfitabilityStats(
         this.filterForm.valueChanges
           .startWith(this.filterForm.value),
+        this.rigProfiles.getDefaultRigProfile(),
       );
     this.dayData = data.dayData
       .map((results) => results.filter(r => r.series.length > 0));

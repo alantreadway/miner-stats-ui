@@ -3,26 +3,32 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
 
-import { ALGORITHMS, POOLS, RIG_PROFILE } from 'app/shared/configurations';
+import { AngularFire2DatabaseAdaptor } from 'app/shared/angular-fire2';
 import {
+  Algorithm,
+  ALL_ALGORITHMS,
+  ALL_POOLS,
+  Pool,
   PoolAlgoRecord,
   PoolAlgoRollupRecord,
-} from 'app/shared/firebase.interface';
-import { TimeseriesData } from 'app/shared/timeseries.interface';
+  PoolProfitability,
+} from 'app/shared/schema';
+import { RigProfile } from 'app/shared/schema';
+import { TimeseriesData, TimeseriesDataPoint } from 'app/shared/timeseries.interface';
 
 export type TimeseriesDataWithKeys = TimeseriesData & {
   algo: string,
   pool: string,
 };
 export type PoolAlgoData = TimeseriesDataWithKeys & {
-  mostRecent?: TimeseriesDataWithKeys['series'][0],
+  mostRecent?: TimeseriesDataPoint,
 };
 
 interface ProfitabilityFilter { name: string; }
 
 function convertMinuteData(
   multiplier: number,
-): (data: PoolAlgoRecord) => TimeseriesData['series'][0] {
+): (data: PoolAlgoRecord) => TimeseriesDataPoint {
   return (r) => {
     return {
       name: new Date((r.timestamp || 0) * 1000),
@@ -33,7 +39,7 @@ function convertMinuteData(
 
 function convertRollupData(
   multiplier: number,
-): (data: PoolAlgoRollupRecord) => TimeseriesData['series'][0] {
+): (data: PoolAlgoRollupRecord) => TimeseriesDataPoint {
   return (r) => {
     return {
       max: r.max.amount * multiplier,
@@ -47,11 +53,12 @@ function convertRollupData(
 @Injectable()
 export class MetricsService {
   public constructor(
-    private readonly db: AngularFireDatabase,
+    private readonly db: AngularFire2DatabaseAdaptor,
   ) {}
 
   public getProfitabilityStats(
     filter: Observable<ProfitabilityFilter>,
+    rigProfile: Observable<RigProfile>,
   ): {
     minuteData: Observable<PoolAlgoData[]>,
     hourData: Observable<PoolAlgoData[]>,
@@ -60,28 +67,32 @@ export class MetricsService {
     return {
       // tslint:disable:object-literal-sort-keys
       minuteData: this.buildFilterChain(
-        (p, a) => this.watchProfitability(p, a, 'minute', convertMinuteData, 120),
+        (p, a) => this.watchProfitability(p, a, 'per-minute', convertMinuteData, 120, rigProfile),
         filter,
+        rigProfile,
       ),
       hourData: this.buildFilterChain(
-        (p, a) => this.watchProfitability(p, a, 'hour', convertRollupData, 72),
+        (p, a) => this.watchProfitability(p, a, 'per-hour', convertRollupData, 72, rigProfile),
         filter,
+        rigProfile,
       ),
       dayData: this.buildFilterChain(
-        (p, a) => this.watchProfitability(p, a, 'day', convertRollupData, 30),
+        (p, a) => this.watchProfitability(p, a, 'per-day', convertRollupData, 30, rigProfile),
         filter,
+        rigProfile,
       ),
       // tslint:enable:object-literal-sort-keys
     };
   }
 
   private buildFilterChain<T extends PoolAlgoData>(
-    source: (pool: string, algo: string) => Observable<T>,
+    source: (pool: Pool, algo: Algorithm, rigProfile: Observable<RigProfile>) => Observable<T>,
     filterSource: Observable<ProfitabilityFilter>,
+    rigProfile: Observable<RigProfile>,
   ): Observable<T[]> {
     return Observable.combineLatest(
       ..._.flatten(
-        POOLS.map((pool) => ALGORITHMS.map((algo) => source(pool, algo))),
+        ALL_POOLS.map((pool) => ALL_ALGORITHMS.map((algo) => source(pool, algo, rigProfile))),
       ),
     )
       .debounceTime(1000)
@@ -98,36 +109,38 @@ export class MetricsService {
   }
 
   private watchProfitability<
-    T extends PoolAlgoRecord | PoolAlgoRollupRecord
+    K extends keyof PoolProfitability,
+    Z extends keyof PoolProfitability[K],
+    T extends PoolProfitability[K][Z]
   >(
-      pool: string,
-      algo: string,
-      granularity: 'day' | 'minute' | 'hour',
-      convertFn: (multiplier: number) => (data: T) => TimeseriesDataWithKeys['series'][0],
-      limit = 120,
+    pool: Pool,
+    algo: Algorithm,
+    granularityKey: K,
+    convertFn: (multiplier: number) => (data: T) => TimeseriesDataPoint,
+    limit = 120,
+    rigProfile: Observable<RigProfile>,
   ): Observable<PoolAlgoData> {
     let limitMinutes = limit;
-    switch (granularity) {
-      case 'day':
+    switch (granularityKey) {
+      case 'per-day':
         limitMinutes = limit * 24 * 60;
         break;
-      case 'hour':
+      case 'per-hour':
         limitMinutes = limit * 60;
         break;
       default:
     }
 
-    const multiplier = this.multiplier(pool, algo);
-    const convertFnInstance = convertFn(multiplier);
-
-    return this.db.list<T>(
-      `/v2/pool/${pool}/${algo}/profitability/per-${granularity}`,
-      (query) => query.orderByPriority()
-        .limitToLast(limit),
-    )
-      .valueChanges()
+    const listResult: Observable<T[]> = this.db.list(
+      ['v2', 'pool', pool, algo, 'profitability', granularityKey],
+      { limitToLast: limit, orderByPriority: true },
+    );
+    return listResult
+      .combineLatest(
+        rigProfile.map(p => convertFn(this.multiplier(pool, algo, p))),
+      )
       .map(
-        (data): PoolAlgoData => {
+        ([data, convertFnInstance]): PoolAlgoData => {
           const timeLimit = (Date.now() - limitMinutes * 60 * 1000);
 
           const mostRecent = data.reduce(
@@ -145,7 +158,8 @@ export class MetricsService {
             mostRecent: mostRecent != null ? convertFnInstance(mostRecent) : undefined,
             name: `${pool} - ${algo}`,
             pool,
-            series: data.map(convertFnInstance)
+            series: data
+              .map(convertFnInstance)
               .filter(p => {
                 if (typeof p.name === 'string') {
                   return true;
@@ -157,7 +171,7 @@ export class MetricsService {
     );
   }
 
-  private multiplier(pool: string, algo: string): number {
+  private multiplier(pool: Pool, algo: Algorithm, rigProfile: RigProfile): number {
     let spdDivisor = 1e6; // MH
     if (algo === 'blake2s' || algo === 'blakecoin') {
       spdDivisor = 1e9; // GH
@@ -165,6 +179,6 @@ export class MetricsService {
     if (algo === 'yescrypt') {
       spdDivisor = 1e3; // KH
     }
-    return (((RIG_PROFILE[algo] * 1000) || 0) * 1000) / spdDivisor;
+    return (((rigProfile[algo] || 0) * 1000) * 1000) / spdDivisor;
   }
 }

@@ -1,19 +1,6 @@
-export const RIG_PROFILE: { [key: string]: number } = {
-  // blake256r14: 1056000000,
-  // blake2s: 26000000000,
-  // cryptonight: 3780,
-  // equihash: 2850,
-  // ethash: 158400000,
-  // keccak: 4400000000,
-  // lbry: 244000000,
-  // lyra2v2: 244000000,
-  // neoscrypt: 5200000,
-  // nist5: 251000000,
-  // pascal: 6300000000,
-  // skein: 2100000000,
-  // skunk: 181000000,
-  // tribus: 330000000,
-  // x17: 55000000,
+import { RigProfile } from 'app/shared/schema';
+
+export const RIG_PROFILE: RigProfile = {
   bastion: 72592.2,
   bitcore: 78028.8,
   blake: 15529308.8,
