@@ -11,18 +11,24 @@ import { Observable } from 'rxjs/Observable';
 
 import { ALGORITHMS, POOLS, RIG_PROFILE } from 'app/shared/configurations';
 import {
-  PoolAlgoProfitabilityRecord,
-  PoolAlgoProfitabilityRollupRecord,
+  PoolAlgoRecord,
+  PoolAlgoRollupRecord,
 } from 'app/shared/firebase.interface';
 import { TimeseriesData } from 'app/shared/timeseries.interface';
 
-export type TimeseriesDataWithKeys = TimeseriesData & { algo: string, pool: string };
+export type TimeseriesDataWithKeys = TimeseriesData & {
+  algo: string,
+  pool: string,
+};
+export type PoolAlgoData = TimeseriesDataWithKeys & {
+  mostRecent?: TimeseriesDataWithKeys['series'][0],
+};
 
 interface ProfitabilityFilter { name: string; }
 
 function convertMinuteData(
   multiplier: number,
-): (data: PoolAlgoProfitabilityRecord) => TimeseriesData['series'][0] {
+): (data: PoolAlgoRecord) => TimeseriesData['series'][0] {
   return (r) => {
     return {
       name: new Date((r.timestamp || 0) * 1000),
@@ -33,7 +39,7 @@ function convertMinuteData(
 
 function convertRollupData(
   multiplier: number,
-): (data: PoolAlgoProfitabilityRollupRecord) => TimeseriesData['series'][0] {
+): (data: PoolAlgoRollupRecord) => TimeseriesData['series'][0] {
   return (r) => {
     return {
       max: r.max.amount * multiplier,
@@ -53,9 +59,9 @@ export class MetricsService {
   public getProfitabilityStats(
     filter: Observable<ProfitabilityFilter>,
   ): {
-    minuteData: Observable<TimeseriesDataWithKeys[]>,
-    hourData: Observable<TimeseriesDataWithKeys[]>,
-    dayData: Observable<TimeseriesDataWithKeys[]>,
+    minuteData: Observable<PoolAlgoData[]>,
+    hourData: Observable<PoolAlgoData[]>,
+    dayData: Observable<PoolAlgoData[]>,
   } {
     return {
       // tslint:disable:object-literal-sort-keys
@@ -75,7 +81,7 @@ export class MetricsService {
     };
   }
 
-  private buildFilterChain<T extends TimeseriesDataWithKeys>(
+  private buildFilterChain<T extends PoolAlgoData>(
     source: (pool: string, algo: string) => Observable<T>,
     filterSource: Observable<ProfitabilityFilter>,
   ): Observable<T[]> {
@@ -89,8 +95,7 @@ export class MetricsService {
       .map(([results, filter]) => {
         return results.filter(
           (result) => {
-            return result.series.length > 0 &&
-              (!filter.name || result.name.indexOf(filter.name) >= 0);
+            return (!filter.name || result.name.indexOf(filter.name) >= 0);
           },
         );
       })
@@ -99,14 +104,14 @@ export class MetricsService {
   }
 
   private watchProfitability<
-    T extends PoolAlgoProfitabilityRecord | PoolAlgoProfitabilityRollupRecord
-    >(
+    T extends PoolAlgoRecord | PoolAlgoRollupRecord
+  >(
       pool: string,
       algo: string,
       granularity: 'day' | 'minute' | 'hour',
       convertFn: (multiplier: number) => (data: T) => TimeseriesDataWithKeys['series'][0],
       limit = 120,
-  ): Observable<TimeseriesDataWithKeys> {
+  ): Observable<PoolAlgoData> {
     let limitMinutes = limit;
     switch (granularity) {
       case 'day':
@@ -119,6 +124,7 @@ export class MetricsService {
     }
 
     const multiplier = this.multiplier(pool, algo);
+    const convertFnInstance = convertFn(multiplier);
 
     return this.db.list<T>(
       `/v2/pool/${pool}/${algo}/profitability/per-${granularity}`,
@@ -127,14 +133,25 @@ export class MetricsService {
     )
       .valueChanges()
       .map(
-        (data): TimeseriesDataWithKeys => {
+        (data): PoolAlgoData => {
           const timeLimit = (Date.now() - limitMinutes * 60 * 1000);
+
+          const mostRecent = data.reduce(
+            (newest, next) => {
+              if (newest.timestamp < next.timestamp) {
+                return next;
+              }
+              return newest;
+            },
+            data[0],
+          );
 
           return {
             algo,
+            mostRecent: mostRecent != null ? convertFnInstance(mostRecent) : undefined,
             name: `${pool} - ${algo}`,
             pool,
-            series: data.map(convertFn(multiplier))
+            series: data.map(convertFnInstance)
               .filter(p => {
                 if (typeof p.name === 'string') {
                   return true;

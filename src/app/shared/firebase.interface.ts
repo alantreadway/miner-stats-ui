@@ -5,12 +5,12 @@ export interface DigitalCurrencyAmount {
 
 export type SecondsSinceEpoch = number;
 
-export interface PoolAlgoProfitabilityRecord {
+export interface PoolAlgoRecord {
   amount: DigitalCurrencyAmount;
   timestamp: SecondsSinceEpoch;
 }
 
-export interface PoolAlgoProfitabilityRollupRecord {
+export interface PoolAlgoRollupRecord {
   min: DigitalCurrencyAmount;
   max: DigitalCurrencyAmount;
   sum: DigitalCurrencyAmount;
