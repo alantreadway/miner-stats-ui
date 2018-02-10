@@ -179,6 +179,6 @@ export class MetricsService {
     if (algo === 'yescrypt') {
       spdDivisor = 1e3; // KH
     }
-    return (((rigProfile[algo] || 0) * 1000) * 1000) / spdDivisor;
+    return (((rigProfile.hashrates[algo] || 0) * 1000) * 1000) / spdDivisor;
   }
 }

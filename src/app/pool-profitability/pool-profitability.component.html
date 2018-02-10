@@ -1,5 +1,5 @@
 <div fxLayout="row" fxLayout.lt-lg="column">
-  <div [fxFlex]="graphSize | async" fxFlexFill>
+  <div [fxFlex]="graphSizeFlex | async" fxFlexFill>
     <mat-tab-group class="grid-content">
       <mat-tab label="Last 120 minutes" class="graph-container">
         <ng-container *ngIf="minuteData | async as loadedData; else loading">
@@ -31,6 +31,19 @@
     <form [formGroup]="filterForm" class="grid-content">
       <mat-form-field>
         <input matInput [formControlName]="'name'" placeholder="Filter">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-select
+          placeholder="Rig Profile"
+          (selectionChange)="rigProfileSelected($event)"
+          [value]="selectedProfile | async"
+        >
+          <ng-container *ngIf="availableRigProfiles | async as rigProfiles">
+            <mat-option *ngFor="let uuid of keys(rigProfiles)" [value]="uuid">
+              {{rigProfiles[uuid].name}}
+            </mat-option>
+          </ng-container>
+        </mat-select>
       </mat-form-field>
       <mat-table [dataSource]="tablePageData">
         <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>

@@ -6,12 +6,17 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs/Observable';
 
 import { BREAKPOINTS, ObservableMedia } from '@angular/flex-layout';
-import { PageEvent } from '@angular/material';
-import { ALGORITHMS, POOLS, RIG_PROFILE } from 'app/shared/configurations';
+import { MatSelectChange, PageEvent } from '@angular/material';
+import { OFFLINE_RIG_PROFILE } from 'app/shared/configurations';
 import { MetricsService, PoolAlgoData } from 'app/shared/metrics.service';
 import {
+  Algorithm,
+  ALL_ALGORITHMS,
+  ALL_POOLS,
+  Pool,
   PoolAlgoRecord,
   PoolAlgoRollupRecord,
+  RigProfile,
 } from 'app/shared/schema';
 import { TimeseriesData } from 'app/shared/timeseries.interface';
 import { Dictionary } from 'lodash';
@@ -36,8 +41,10 @@ export class PoolProfitabilityComponent {
   public graphSize: Observable<[number, number]>;
   public graphSizeFlex: Observable<string>;
 
-  public readonly pools: typeof POOLS = POOLS;
-  public readonly algos: typeof ALGORITHMS = ALGORITHMS;
+  public readonly keys: typeof Object.keys = Object.keys;
+
+  public readonly pools: Pool[] = ALL_POOLS;
+  public readonly algos: Algorithm[] = ALL_ALGORITHMS;
 
   public readonly minuteData: Observable<PoolAlgoData[]>;
   public readonly hourData: Observable<PoolAlgoData[]>;
@@ -52,6 +59,9 @@ export class PoolProfitabilityComponent {
   public tablePageTotal: Observable<number>;
   public readonly columnsToDisplay: (keyof TableData)[] =
     ['name', 'value', 'age'];
+
+  public readonly availableRigProfiles: Observable<{ [uuid: string]: RigProfile }>;
+  public readonly selectedProfile: Subject<string> = new Subject<string>();
 
   public constructor(
     private readonly metrics: MetricsService,
@@ -81,6 +91,16 @@ export class PoolProfitabilityComponent {
       });
     this.graphSizeFlex = this.graphSize.map(([x, y]) => `${x}px ${y + 100}px`);
 
+    this.availableRigProfiles = this.rigProfiles.getRigProfiles();
+
+    this.rigProfiles.getDefaultRigProfile()
+      .first()
+      .subscribe((defaultProfile) => {
+        if (defaultProfile != null) {
+          this.selectedProfile.next(defaultProfile);
+        }
+      }),
+
     this.filterForm = new FormGroup({
       name: new FormControl(''),
     });
@@ -88,8 +108,11 @@ export class PoolProfitabilityComponent {
     const data =
       this.metrics.getProfitabilityStats(
         this.filterForm.valueChanges
-          .startWith(this.filterForm.value),
-        this.rigProfiles.getDefaultRigProfile(),
+          .startWith(this.filterForm.value)
+          .debounceTime(500),
+        this.availableRigProfiles
+          .combineLatest(this.selectedProfile)
+          .map(([profiles, selected]) => profiles[selected]),
       );
     this.dayData = data.dayData
       .map((results) => results.filter(r => r.series.length > 0));
@@ -125,5 +148,9 @@ export class PoolProfitabilityComponent {
 
   public tablePageChanged(event: PageEvent): void {
     this.tablePageNumber.next(event.pageIndex);
+  }
+
+  public rigProfileSelected(event: MatSelectChange): void {
+    this.selectedProfile.next(event.value);
   }
 }

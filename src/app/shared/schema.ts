@@ -98,18 +98,24 @@ export type PoolStatistics = {
   [algo in Algorithm]: { profitability: PoolProfitability };
 };
 
-export type RigProfile = { [algo in Algorithm]?: number };
+export interface RigProfile {
+  name: string;
+  hashrates: { [algo in Algorithm]?: number };
+}
 export interface UserProfile {
   defaults: {
     'rig-profile': string;
   };
   'rig-profile': {
-    [profileId: string]: RigProfile;
+    [profileUuid: string]: RigProfile;
   };
 }
 
 export interface Schema {
   v2: {
+    'rig-profile': {
+      [profileUuid: string]: RigProfile;
+    };
     pool: {
       [key in Pool]: PoolStatistics;
     };

@@ -10,6 +10,7 @@ import {
   MatInputModule,
   MatPaginatorModule,
   MatProgressSpinnerModule,
+  MatSelectModule,
   MatSpinner,
   MatTableModule,
   MatTabsModule,
@@ -30,6 +31,7 @@ import { AppComponent } from './app.component';
 import { GraphComponent } from './graph/graph.component';
 import { PoolProfitabilityComponent } from './pool-profitability/pool-profitability.component';
 import { MetricsService } from './shared/metrics.service';
+import { RigProfilesService } from './shared/rig-profiles.service';
 
 const APP_ROUTES: Routes = [
   { path: 'pool-profitability', component: PoolProfitabilityComponent },
@@ -70,6 +72,7 @@ const APP_ROUTES: Routes = [
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatTabsModule,
     MatToolbarModule,
     MatTooltipModule,
@@ -79,6 +82,7 @@ const APP_ROUTES: Routes = [
   providers: [
     AngularFire2DatabaseAdaptor,
     MetricsService,
+    RigProfilesService,
   ],
 })
 export class AppModule { }
