@@ -3,13 +3,6 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { AngularFireDatabase } from 'angularfire2/database';
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import 'rxjs/add/observable/combineLatest';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/combineLatest';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/publishReplay';
-import 'rxjs/add/operator/startWith';
 import { Observable } from 'rxjs/Observable';
 
 import { BREAKPOINTS, ObservableMedia } from '@angular/flex-layout';
