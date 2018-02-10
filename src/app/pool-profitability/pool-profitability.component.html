@@ -2,7 +2,7 @@
   <mat-card-content>
     <mat-tab-group>
       <mat-tab label="Last 120 minutes" class="graph-container">
-        <ng-container *ngIf="data | async as loadedData; else loading">
+        <ng-container *ngIf="minuteData | async as loadedData; else loading">
           <msu-graph [data]="loadedData"></msu-graph>
         </ng-container>
         <ng-template #loading>
@@ -10,7 +10,7 @@
         </ng-template>
       </mat-tab>
       <mat-tab label="Last 48 hours" class="graph-container">
-        <ng-container *ngIf="hourlyData | async as loadedData; else loading">
+        <ng-container *ngIf="hourData | async as loadedData; else loading">
           <msu-graph [data]="loadedData"></msu-graph>
         </ng-container>
         <ng-template #loading>
@@ -18,7 +18,7 @@
         </ng-template>
       </mat-tab>
       <mat-tab label="Last 30 days" class="graph-container">
-        <ng-container *ngIf="dailyData | async as loadedData; else loading">
+        <ng-container *ngIf="dayData | async as loadedData; else loading">
           <msu-graph [data]="loadedData"></msu-graph>
         </ng-container>
         <ng-template #loading>
@@ -29,7 +29,7 @@
 
     <form [formGroup]="filterForm">
       <mat-form-field>
-        <input matInput [formControlName]="'textFilter'" placeholder="Filter">
+        <input matInput [formControlName]="'name'" placeholder="Filter">
       </mat-form-field>
       <mat-table [dataSource]="tableData">
         <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
@@ -38,11 +38,11 @@
           <mat-header-cell *matHeaderCellDef>Pool / Algo</mat-header-cell>
           <mat-cell *matCellDef="let data">{{ data.name }}</mat-cell>
         </ng-container>
-        <ng-container matColumnDef="profitability">
+        <ng-container matColumnDef="value">
           <mat-header-cell *matHeaderCellDef>Profitability (mBTC/day)</mat-header-cell>
           <mat-cell *matCellDef="let data">{{ data.value }}</mat-cell>
         </ng-container>
-        <ng-container matColumnDef="timestamp">
+        <ng-container matColumnDef="age">
           <mat-header-cell *matHeaderCellDef>Last Update</mat-header-cell>
           <mat-cell *matCellDef="let data">{{ data.age }}</mat-cell>
         </ng-container>

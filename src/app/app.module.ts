@@ -25,6 +25,7 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { GraphComponent } from './graph/graph.component';
 import { PoolProfitabilityComponent } from './pool-profitability/pool-profitability.component';
+import { MetricsService } from './shared/metrics.service';
 
 const APP_ROUTES: Routes = [
   { path: 'pool-profitability', component: PoolProfitabilityComponent },
@@ -68,6 +69,8 @@ const APP_ROUTES: Routes = [
     MatTableModule,
     NgxChartsModule,
   ],
-  providers: [],
+  providers: [
+    MetricsService,
+  ],
 })
 export class AppModule { }
