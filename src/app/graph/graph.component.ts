@@ -8,6 +8,7 @@ import { TimeseriesData } from 'app/shared/timeseries.interface';
 })
 export class GraphComponent implements OnChanges {
   @Input() public data?: TimeseriesData[];
+  @Input() public size?: [number, number];
 
   public displayData: TimeseriesData[] = [];
 

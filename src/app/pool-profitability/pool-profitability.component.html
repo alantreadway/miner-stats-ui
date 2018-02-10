@@ -1,9 +1,9 @@
-<mat-card>
-  <mat-card-content>
-    <mat-tab-group>
+<div fxLayout="row" fxLayout.lt-lg="column">
+  <div [fxFlex]="graphSize | async" fxFlexFill>
+    <mat-tab-group class="grid-content">
       <mat-tab label="Last 120 minutes" class="graph-container">
         <ng-container *ngIf="minuteData | async as loadedData; else loading">
-          <msu-graph [data]="loadedData"></msu-graph>
+          <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
         <ng-template #loading>
           <mat-spinner></mat-spinner>
@@ -11,7 +11,7 @@
       </mat-tab>
       <mat-tab label="Last 48 hours" class="graph-container">
         <ng-container *ngIf="hourData | async as loadedData; else loading">
-          <msu-graph [data]="loadedData"></msu-graph>
+          <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
         <ng-template #loading>
           <mat-spinner></mat-spinner>
@@ -19,19 +19,20 @@
       </mat-tab>
       <mat-tab label="Last 30 days" class="graph-container">
         <ng-container *ngIf="dayData | async as loadedData; else loading">
-          <msu-graph [data]="loadedData"></msu-graph>
+          <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
         <ng-template #loading>
           <mat-spinner></mat-spinner>
         </ng-template>
       </mat-tab>
     </mat-tab-group>
-
-    <form [formGroup]="filterForm">
+  </div>
+  <div fxFlex="1 1" fxFlex.lt-lg="100">
+    <form [formGroup]="filterForm" class="grid-content">
       <mat-form-field>
         <input matInput [formControlName]="'name'" placeholder="Filter">
       </mat-form-field>
-      <mat-table [dataSource]="tableData">
+      <mat-table [dataSource]="tablePageData">
         <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
         <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
         <ng-container matColumnDef="name">
@@ -40,35 +41,20 @@
         </ng-container>
         <ng-container matColumnDef="value">
           <mat-header-cell *matHeaderCellDef>Profitability (mBTC/day)</mat-header-cell>
-          <mat-cell *matCellDef="let data">{{ data.value }}</mat-cell>
+          <mat-cell *matCellDef="let data">{{ data.value | number:'1.4-4' }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="age">
           <mat-header-cell *matHeaderCellDef>Last Update</mat-header-cell>
           <mat-cell *matCellDef="let data">{{ data.age }}</mat-cell>
         </ng-container>
       </mat-table>
+      <mat-paginator
+        [length]="tablePageTotal | async"
+        [pageSize]="tablePageSize | async"
+        [pageIndex]="tablePageNumber | async"
+        (page)="tablePageChanged($event)"
+      >
+      </mat-paginator>
     </form>
-  </mat-card-content>
-</mat-card>
-
-<!-- <mat-card>
-  <mat-card-header>
-    <mat-card-title>
-      <h2>Filters</h2>
-    </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <section [formArrayName]="'pools'">
-      <h3>Pools</h3>
-      <mat-checkbox *ngFor="let pool of pools" [formControlName]="pool">
-        {{ pool }}
-      </mat-checkbox>
-    </section>
-    <section [formArrayName]="'algos'">
-      <h3>Algorithms</h3>
-      <mat-checkbox *ngFor="let algo of algos" [formControlName]="algo">
-        {{ algo }}
-      </mat-checkbox>
-    </section>
-  </mat-card-content>
-</mat-card> -->
+  </div>
+</div>

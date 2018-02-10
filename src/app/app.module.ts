@@ -1,10 +1,13 @@
 import { NgModule } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import {
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
   MatFormFieldModule,
+  MatGridListModule,
   MatInputModule,
+  MatPaginatorModule,
   MatProgressSpinnerModule,
   MatSpinner,
   MatTableModule,
@@ -57,11 +60,14 @@ const APP_ROUTES: Routes = [
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
+    FlexLayoutModule,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
     MatFormFieldModule,
+    MatGridListModule,
     MatInputModule,
+    MatPaginatorModule,
     MatProgressSpinnerModule,
     MatTabsModule,
     MatToolbarModule,
