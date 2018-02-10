@@ -1,61 +1,74 @@
-<form [formGroup]="filterForm">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title><h2>Filters</h2></mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <section [formArrayName]="'pools'">
-        <h3>Pools</h3>
-        <mat-checkbox
-          *ngFor="let pool of pools"
-          [formControlName]="pool"
-        >
-          {{ pool }}
-        </mat-checkbox>
-      </section>
-      <section [formArrayName]="'algos'">
-        <h3>Algorithms</h3>
-        <mat-checkbox
-          *ngFor="let algo of algos"
-          [formControlName]="algo"
-        >
-          {{ algo }}
-        </mat-checkbox>
-      </section>
-    </mat-card-content>
-  </mat-card>
-</form>
+<mat-card>
+  <mat-card-content>
+    <mat-tab-group>
+      <mat-tab label="Last 120 minutes" class="graph-container">
+        <ng-container *ngIf="data | async as loadedData; else loading">
+          <msu-graph [data]="loadedData"></msu-graph>
+        </ng-container>
+        <ng-template #loading>
+          <mat-spinner></mat-spinner>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Last 48 hours" class="graph-container">
+        <ng-container *ngIf="hourlyData | async as loadedData; else loading">
+          <msu-graph [data]="loadedData"></msu-graph>
+        </ng-container>
+        <ng-template #loading>
+          <mat-spinner></mat-spinner>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Last 30 days" class="graph-container">
+        <ng-container *ngIf="dailyData | async as loadedData; else loading">
+          <msu-graph [data]="loadedData"></msu-graph>
+        </ng-container>
+        <ng-template #loading>
+          <mat-spinner></mat-spinner>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
 
-<mat-tab-group>
-  <mat-tab label="Last 120 minutes" class="graph-container">
-    <ng-container *ngIf="data | async as loadedData; else loading">
-      <msu-graph [data]="loadedData"></msu-graph>
-    </ng-container>
-    <ng-template #loading>
-      <mat-spinner></mat-spinner>
-    </ng-template>
-  </mat-tab>
-  <mat-tab label="Last 48 hours" class="graph-container">
-    <ng-container *ngIf="hourlyData | async as loadedData; else loading">
-      <msu-graph [data]="loadedData"></msu-graph>
-    </ng-container>
-    <ng-template #loading>
-      <mat-spinner></mat-spinner>
-    </ng-template>
-  </mat-tab>
-  <mat-tab label="Last 30 days" class="graph-container">
-    <ng-container *ngIf="dailyData | async as loadedData; else loading">
-      <msu-graph [data]="loadedData"></msu-graph>
-    </ng-container>
-    <ng-template #loading>
-      <mat-spinner></mat-spinner>
-    </ng-template>
-  </mat-tab>
-</mat-tab-group>
+    <form [formGroup]="filterForm">
+      <mat-form-field>
+        <input matInput [formControlName]="'textFilter'" placeholder="Filter">
+      </mat-form-field>
+      <mat-table [dataSource]="tableData">
+        <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+        <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef>Pool / Algo</mat-header-cell>
+          <mat-cell *matCellDef="let data">{{ data.name }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="profitability">
+          <mat-header-cell *matHeaderCellDef>Profitability (mBTC/day)</mat-header-cell>
+          <mat-cell *matCellDef="let data">{{ data.value }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="timestamp">
+          <mat-header-cell *matHeaderCellDef>Last Update</mat-header-cell>
+          <mat-cell *matCellDef="let data">{{ data.age }}</mat-cell>
+        </ng-container>
+      </mat-table>
+    </form>
+  </mat-card-content>
+</mat-card>
 
-<!-- <mat-table [dataSource]="latest">
-  <ng-container matColumnDef="name">
-    <mat-header-cell *matHeaderCellDef>Pool / Algo</mat-header-cell>
-    <mat-cell *matCellDef="let data">{{ data.label }}</mat-cell>
-  </ng-container>
-</mat-table> -->
+<!-- <mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      <h2>Filters</h2>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <section [formArrayName]="'pools'">
+      <h3>Pools</h3>
+      <mat-checkbox *ngFor="let pool of pools" [formControlName]="pool">
+        {{ pool }}
+      </mat-checkbox>
+    </section>
+    <section [formArrayName]="'algos'">
+      <h3>Algorithms</h3>
+      <mat-checkbox *ngFor="let algo of algos" [formControlName]="algo">
+        {{ algo }}
+      </mat-checkbox>
+    </section>
+  </mat-card-content>
+</mat-card> -->

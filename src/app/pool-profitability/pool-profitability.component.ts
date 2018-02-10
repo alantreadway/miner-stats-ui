@@ -2,9 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { AngularFireDatabase } from 'angularfire2/database';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import 'rxjs/add/observable/combineLatest';
+import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/publishReplay';
 import 'rxjs/add/operator/startWith';
 import { Observable } from 'rxjs/Observable';
 
@@ -17,6 +20,26 @@ import { TimeseriesData } from 'app/shared/timeseries.interface';
 import { Dictionary } from 'lodash';
 
 type TimeseriesDataWithKeys = TimeseriesData & { algo: string, pool: string };
+
+interface TableData {
+  name: string;
+  pool: string;
+  algo: string;
+  value: number;
+  age: string;
+}
+
+const PRETTY_DATE_JS_OPTIONS = {
+  lang: {
+    days: ['d', 'd'],
+    hours: ['h', 'h'],
+    minutes: ['m', 'm'],
+    misc: ['ago', 'error'],
+    months: ['M', 'M'],
+    seconds: ['s', 's'],
+    years: ['y', 'y'],
+  },
+};
 
 function convertMinuteData(
   multiplier: number,
@@ -55,7 +78,10 @@ export class PoolProfitabilityComponent {
   public readonly hourlyData: Observable<TimeseriesDataWithKeys[]>;
   public readonly dailyData: Observable<TimeseriesDataWithKeys[]>;
 
-  public filterForm: FormGroup;
+  public readonly filterForm: FormGroup;
+
+  public readonly tableData: Observable<TableData[]>;
+  public readonly columnsToDisplay: string[] = ['name', 'profitability', 'timestamp'];
 
   public constructor(
     private readonly db: AngularFireDatabase,
@@ -79,6 +105,7 @@ export class PoolProfitabilityComponent {
           {} as Dictionary<FormControl>,
         ),
       ),
+      textFilter: new FormControl(''),
     });
 
     this.data = this.buildFilterChain(
@@ -90,6 +117,30 @@ export class PoolProfitabilityComponent {
     this.dailyData = this.buildFilterChain(
       (p, a) => this.watchProfitability(p, a, 'day', convertRollupData, 30),
     );
+
+    this.tableData = this.data.map(results => {
+      return results
+        .map((result): TableData => {
+          const mostRecent = result.series.reduce(
+            (newest, next) => {
+              if (newest.name.getTime() < next.name.getTime()) {
+                return next;
+              }
+              return newest;
+            },
+            result.series[0],
+          );
+
+          return {
+            age: moment(mostRecent.name).fromNow(),
+            algo: result.algo,
+            name: result.name,
+            pool: result.pool,
+            value: mostRecent.value,
+          };
+        })
+        .sort((a, b) => b.value - a.value);
+    });
   }
 
   private buildFilterChain(
@@ -111,10 +162,13 @@ export class PoolProfitabilityComponent {
           (result) => {
             return result.series.length > 0 &&
               filter.pools[result.pool] &&
-              filter.algos[result.algo];
+              filter.algos[result.algo] &&
+              (!filter.textFilter || result.name.indexOf(filter.textFilter) >= 0);
           },
         );
-      });
+      })
+      .publishReplay(1)
+      .refCount();
   }
 
   private watchProfitability<
@@ -141,7 +195,8 @@ export class PoolProfitabilityComponent {
 
     return this.db.list<T>(
       `/v2/pool/${pool}/${algo}/profitability/per-${granularity}`,
-      (query) => query.limitToLast(limit),
+      (query) => query.orderByPriority()
+        .limitToLast(limit),
     )
       .valueChanges()
       .map(

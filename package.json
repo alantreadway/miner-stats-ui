@@ -31,6 +31,7 @@
     "firebase": "^4.9.1",
     "hammerjs": "^2.0.8",
     "lodash": "^4.17.5",
+    "moment": "^2.20.1",
     "rxjs": "^5.5.6",
     "zone.js": "^0.8.19"
   },
@@ -44,6 +45,7 @@
     "@types/jasmine": "~2.8.3",
     "@types/jasminewd2": "~2.0.2",
     "@types/lodash": "^4.14.101",
+    "@types/moment": "^2.13.0",
     "@types/node": "~6.0.60",
     "codelyzer": "^4.0.1",
     "jasmine-core": "~2.8.0",

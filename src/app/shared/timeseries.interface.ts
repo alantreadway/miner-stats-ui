@@ -4,6 +4,6 @@ export interface TimeseriesData {
     value: number;
     min?: number;
     max?: number;
-    name: string | Date;
+    name: Date;
   }[];
 }
