@@ -32,6 +32,13 @@ interface TableData {
   age?: string;
 }
 
+const SORTED_FILTER_NAMES = [
+  ...ALL_ALGORITHMS,
+  ...ALL_POOLS,
+  ..._.flatten(ALL_POOLS.map(p => ALL_ALGORITHMS.map(a => `${p} - ${a}`))),
+]
+  .sort();
+
 @Component({
   selector: 'msu-pool-profitability',
   styleUrls: ['./pool-profitability.component.scss'],
@@ -51,6 +58,7 @@ export class PoolProfitabilityComponent {
   public readonly dayData: Observable<PoolAlgoData[]>;
 
   public readonly filterForm: FormGroup;
+  public readonly filterNameOptions: Observable<string[]>;
 
   public readonly tableData: Observable<TableData[]>;
   public readonly tablePageData: Observable<TableData[]>;
@@ -104,6 +112,13 @@ export class PoolProfitabilityComponent {
     this.filterForm = new FormGroup({
       name: new FormControl(''),
     });
+    this.filterNameOptions = Observable.of(SORTED_FILTER_NAMES)
+      .combineLatest(this.filterForm.valueChanges.startWith({}))
+      .map(([names, form]) => {
+        return form.name ?
+          names.filter(n => n.indexOf(form.name) >= 0) :
+          names;
+      });
 
     const data =
       this.metrics.getProfitabilityStats(

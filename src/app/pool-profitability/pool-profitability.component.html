@@ -40,10 +40,7 @@
     </mat-tab-group>
   </div>
   <div fxFlex="1 1" fxFlex.lt-lg="100">
-    <form [formGroup]="filterForm" class="grid-content">
-      <mat-form-field>
-        <input matInput [formControlName]="'name'" placeholder="Filter">
-      </mat-form-field>
+    <form [formGroup]="filterForm"  fxLayout="column">
       <mat-form-field>
         <mat-select
           placeholder="Rig Profile"
@@ -56,6 +53,14 @@
             </mat-option>
           </ng-container>
         </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput [formControlName]="'name'" placeholder="Filter" [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let option of filterNameOptions | async" [value]="option">
+            {{ option }}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
       <mat-table [dataSource]="tablePageData">
         <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
