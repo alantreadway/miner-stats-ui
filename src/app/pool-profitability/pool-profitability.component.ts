@@ -114,12 +114,6 @@ export class PoolProfitabilityComponent {
           .combineLatest(this.selectedProfile)
           .map(([profiles, selected]) => profiles[selected]),
       );
-    this.dayData = data.dayData
-      .map((results) => results.filter(r => r.series.length > 0));
-    this.hourData = data.hourData
-      .map((results) => results.filter(r => r.series.length > 0));
-    this.minuteData = data.minuteData
-      .map((results) => results.filter(r => r.series.length > 0));
 
     this.tableData = data.minuteData.map(results => {
       return results
@@ -143,7 +137,28 @@ export class PoolProfitabilityComponent {
       .map(([d, page, size]) => d.slice(
         page * size,
         (page + 1) * size,
-      ));
+      ))
+      .publishReplay(1)
+      .refCount();
+
+    this.dayData = data.dayData
+      .combineLatest(this.tablePageData)
+      .map(([results, tableData]) => results
+        .filter(r => r.series.length > 0)
+        .filter(r => tableData.findIndex(td => td.name === r.name) >= 0),
+      );
+    this.hourData = data.hourData
+      .combineLatest(this.tablePageData)
+      .map(([results, tableData]) => results
+        .filter(r => r.series.length > 0)
+        .filter(r => tableData.findIndex(td => td.name === r.name) >= 0),
+      );
+    this.minuteData = data.minuteData
+      .combineLatest(this.tablePageData)
+      .map(([results, tableData]) => results
+        .filter(r => r.series.length > 0)
+        .filter(r => tableData.findIndex(td => td.name === r.name) >= 0),
+      );
   }
 
   public tablePageChanged(event: PageEvent): void {

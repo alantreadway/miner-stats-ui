@@ -1,7 +1,11 @@
 <div fxLayout="row" fxLayout.lt-lg="column">
   <div [fxFlex]="graphSizeFlex | async" fxFlexFill>
     <mat-tab-group class="grid-content">
-      <mat-tab label="Last 120 minutes" class="graph-container">
+      <mat-tab class="graph-container">
+        <ng-template mat-tab-label>
+          <span fxShow fxHide.lt-sm>Last 120 minutes</span>
+          <span fxHide fxShow.lt-sm>120m</span>
+        </ng-template>
         <ng-container *ngIf="minuteData | async as loadedData; else loading">
           <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
@@ -9,7 +13,11 @@
           <mat-spinner></mat-spinner>
         </ng-template>
       </mat-tab>
-      <mat-tab label="Last 48 hours" class="graph-container">
+      <mat-tab class="graph-container">
+        <ng-template mat-tab-label>
+          <span fxShow fxHide.lt-sm>Last 48 hours</span>
+          <span fxHide fxShow.lt-sm>48h</span>
+        </ng-template>
         <ng-container *ngIf="hourData | async as loadedData; else loading">
           <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
@@ -17,7 +25,11 @@
           <mat-spinner></mat-spinner>
         </ng-template>
       </mat-tab>
-      <mat-tab label="Last 30 days" class="graph-container">
+      <mat-tab class="graph-container">
+        <ng-template mat-tab-label>
+          <span fxShow fxHide.lt-sm>Last 30 days</span>
+          <span fxHide fxShow.lt-sm>30d</span>
+        </ng-template>
         <ng-container *ngIf="dayData | async as loadedData; else loading">
           <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
