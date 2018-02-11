@@ -1,0 +1,44 @@
+<mat-card [fxFlex]="graphSizeFlex | async" fxFlexFill>
+  <mat-card-title-group>
+    <mat-card-title>Profit History</mat-card-title>
+    <mat-card-subtitle>Review trends for the pools/algorithms shown in the adjacent table</mat-card-subtitle>
+  </mat-card-title-group>
+  <mat-tab-group>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span fxShow fxHide.lt-sm>Last 120 minutes</span>
+        <span fxHide fxShow.lt-sm>120m</span>
+      </ng-template>
+      <ng-container *ngIf="minuteData | async as loadedData; else loading">
+        <msu-graph [data]="loadedData" [size]="graphSize | async" [showLabel]="[false, !(isXS | async)]" [showAxis]="[!(isXS | async), true]">
+        </msu-graph>
+      </ng-container>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span fxShow fxHide.lt-sm>Last 48 hours</span>
+        <span fxHide fxShow.lt-sm>48h</span>
+      </ng-template>
+      <ng-container *ngIf="hourData | async as loadedData; else loading">
+        <msu-graph [data]="loadedData" [size]="graphSize | async" [showLabel]="[false, !(isXS | async)]" [showAxis]="[!(isXS | async), true]">
+        </msu-graph>
+      </ng-container>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span fxShow fxHide.lt-sm>Last 30 days</span>
+        <span fxHide fxShow.lt-sm>30d</span>
+      </ng-template>
+      <ng-container *ngIf="dayData | async as loadedData; else loading">
+        <msu-graph [data]="loadedData" [size]="graphSize | async" [showLabel]="[false, !(isXS | async)]" [showAxis]="[!(isXS | async), true]">
+        </msu-graph>
+      </ng-container>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>
+
+<ng-template #loading>
+  <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

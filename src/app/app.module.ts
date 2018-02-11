@@ -30,6 +30,7 @@ import { MediaQueryService } from 'app/shared/media-query.service';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { GraphComponent } from './graph/graph.component';
+import { HistoryComponent } from './pool-profitability/history/history.component';
 import { PoolProfitabilityComponent } from './pool-profitability/pool-profitability.component';
 import { MetricsService } from './shared/metrics.service';
 import { RigProfilesService } from './shared/rig-profiles.service';
@@ -54,6 +55,7 @@ const APP_ROUTES: Routes = [
     AppComponent,
     GraphComponent,
     PoolProfitabilityComponent,
+    HistoryComponent,
   ],
   imports: [
     BrowserModule,
