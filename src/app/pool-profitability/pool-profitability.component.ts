@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { AngularFireDatabase } from 'angularfire2/database';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { Observable } from 'rxjs/Observable';

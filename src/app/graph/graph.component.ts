@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { TimeseriesData } from 'app/shared/timeseries.interface';
 
 @Component({

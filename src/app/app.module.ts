@@ -12,7 +12,6 @@ import {
   MatPaginatorModule,
   MatProgressSpinnerModule,
   MatSelectModule,
-  MatSpinner,
   MatTableModule,
   MatTabsModule,
   MatToolbarModule,
