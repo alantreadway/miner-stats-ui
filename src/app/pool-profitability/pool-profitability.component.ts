@@ -85,11 +85,11 @@ export class PoolProfitabilityComponent {
       .map(([d, e]): [number, number] => {
         switch (d.mqAlias) {
           case 'xs':
-            return [window.innerWidth, window.innerWidth * 0.4];
+            return [window.innerWidth - 60, window.innerWidth * 0.4];
           case 'sm':
-            return [window.innerWidth, window.innerWidth * 0.4];
+            return [window.innerWidth - 60, window.innerWidth * 0.4];
           case 'md':
-            return [window.innerWidth, window.innerWidth * 0.4];
+            return [window.innerWidth - 60, window.innerWidth * 0.4];
           case 'lg':
             return [600, 600];
           default:

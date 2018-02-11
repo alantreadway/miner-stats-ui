@@ -1,4 +1,4 @@
-<mat-toolbar color="primary">
+<mat-toolbar color="primary" class="mat-elevation-z6">
   <span>
     <a mat-button [routerLink]=""><h1>Miner Stats</h1></a>
   </span>
@@ -22,10 +22,20 @@
   </span>
 </mat-toolbar>
 
-<ng-container *ngIf="afAuth.authState | async; else directToLogin">
-  <router-outlet></router-outlet>
-</ng-container>
+<div class="content" ngClass.lt-sm="xs">
+  <ng-container *ngIf="afAuth.authState | async; else directToLogin">
+    <router-outlet></router-outlet>
+  </ng-container>
 
-<ng-template #directToLogin>
-  <h1>Please login to view data.</h1>
-</ng-template>
+  <ng-template #directToLogin>
+    <div fxLayout="column" fxLayoutAlign="center center" fx>
+      <mat-card class="mat-elevation-z8" fxFlexOffset="25px" fxLayout="column" fxLayoutAlign="center center">
+        <mat-card-title>Please login to view data</mat-card-title>
+        <button mat-raised-button (click)="login()" color="primary">
+          <img src="/assets/btn_google_light_normal_ios.svg">
+          Sign in with Google
+        </button>
+      </mat-card>
+    </div>
+  </ng-template>
+</div>

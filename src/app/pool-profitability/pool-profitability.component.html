@@ -1,6 +1,15 @@
-<div fxLayout="row" fxLayout.lt-lg="column">
-  <div [fxFlex]="graphSizeFlex | async" fxFlexFill>
-    <mat-tab-group class="grid-content">
+<div
+  fxLayout="row"
+  fxLayout.lt-lg="column"
+  fxLayoutGap="20px"
+   fxLayoutGap.lt-gt="10px"
+>
+  <mat-card [fxFlex]="graphSizeFlex | async" fxFlexFill>
+    <mat-card-title-group>
+      <mat-card-title>Profit History</mat-card-title>
+      <mat-card-subtitle>Review trends for the pools/algorithms shown in the adjacent table</mat-card-subtitle>
+    </mat-card-title-group>
+    <mat-tab-group>
       <mat-tab class="graph-container">
         <ng-template mat-tab-label>
           <span fxShow fxHide.lt-sm>Last 120 minutes</span>
@@ -38,8 +47,12 @@
         </ng-template>
       </mat-tab>
     </mat-tab-group>
-  </div>
-  <div fxFlex="1 1" fxFlex.lt-lg="100">
+  </mat-card>
+  <mat-card fxFlex="1 1" fxFlex.lt-lg="100">
+    <mat-card-title-group>
+      <mat-card-title>Current Profitability</mat-card-title>
+      <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
+    </mat-card-title-group>
     <form [formGroup]="filterForm"  fxLayout="column">
       <mat-form-field>
         <mat-select
@@ -86,5 +99,5 @@
       >
       </mat-paginator>
     </form>
-  </div>
+  </mat-card>
 </div>
