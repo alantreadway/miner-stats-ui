@@ -2,7 +2,7 @@
   fxLayout="row"
   fxLayout.lt-lg="column"
   fxLayoutGap="20px"
-   fxLayoutGap.lt-gt="10px"
+  fxLayoutGap.lt-gt="10px"
 >
   <mat-card [fxFlex]="graphSizeFlex | async" fxFlexFill>
     <mat-card-title-group>
@@ -18,9 +18,6 @@
         <ng-container *ngIf="minuteData | async as loadedData; else loading">
           <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
         </ng-container>
-        <ng-template #loading>
-          <mat-spinner></mat-spinner>
-        </ng-template>
       </mat-tab>
       <mat-tab class="graph-container">
         <ng-template mat-tab-label>
@@ -53,7 +50,7 @@
       <mat-card-title>Current Profitability</mat-card-title>
       <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
     </mat-card-title-group>
-    <form [formGroup]="filterForm"  fxLayout="column">
+    <form [formGroup]="filterForm"  fxLayout="column" *ngIf="tablePageData | async; else loading">
       <mat-form-field>
         <mat-select
           placeholder="Rig Profile"
@@ -101,3 +98,9 @@
     </form>
   </mat-card>
 </div>
+
+<ng-template #loading>
+  <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>
