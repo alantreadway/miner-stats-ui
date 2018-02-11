@@ -27,6 +27,7 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 
 import { AngularFire2DatabaseAdaptor } from 'app/shared/angular-fire2';
+import { MediaQueryService } from 'app/shared/media-query.service';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { GraphComponent } from './graph/graph.component';
@@ -83,6 +84,7 @@ const APP_ROUTES: Routes = [
   ],
   providers: [
     AngularFire2DatabaseAdaptor,
+    MediaQueryService,
     MetricsService,
     RigProfilesService,
   ],

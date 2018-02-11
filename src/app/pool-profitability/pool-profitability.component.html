@@ -2,7 +2,7 @@
   fxLayout="row"
   fxLayout.lt-lg="column"
   fxLayoutGap="20px"
-  fxLayoutGap.lt-gt="10px"
+  fxLayoutGap.lt-lg="10px"
 >
   <mat-card [fxFlex]="graphSizeFlex | async" fxFlexFill>
     <mat-card-title-group>
@@ -10,38 +10,50 @@
       <mat-card-subtitle>Review trends for the pools/algorithms shown in the adjacent table</mat-card-subtitle>
     </mat-card-title-group>
     <mat-tab-group>
-      <mat-tab class="graph-container">
+      <mat-tab>
         <ng-template mat-tab-label>
           <span fxShow fxHide.lt-sm>Last 120 minutes</span>
           <span fxHide fxShow.lt-sm>120m</span>
         </ng-template>
         <ng-container *ngIf="minuteData | async as loadedData; else loading">
-          <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
+          <msu-graph
+            [data]="loadedData"
+            [size]="graphSize | async"
+            [showLabel]="[false, !(isXS | async)]"
+            [showAxis]="[!(isXS | async), true]"
+          >
+          </msu-graph>
         </ng-container>
       </mat-tab>
-      <mat-tab class="graph-container">
+      <mat-tab>
         <ng-template mat-tab-label>
           <span fxShow fxHide.lt-sm>Last 48 hours</span>
           <span fxHide fxShow.lt-sm>48h</span>
         </ng-template>
         <ng-container *ngIf="hourData | async as loadedData; else loading">
-          <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
+          <msu-graph
+            [data]="loadedData"
+            [size]="graphSize | async"
+            [showLabel]="[false, !(isXS | async)]"
+            [showAxis]="[!(isXS | async), true]"
+          >
+          </msu-graph>
         </ng-container>
-        <ng-template #loading>
-          <mat-spinner></mat-spinner>
-        </ng-template>
       </mat-tab>
-      <mat-tab class="graph-container">
+      <mat-tab>
         <ng-template mat-tab-label>
           <span fxShow fxHide.lt-sm>Last 30 days</span>
           <span fxHide fxShow.lt-sm>30d</span>
         </ng-template>
         <ng-container *ngIf="dayData | async as loadedData; else loading">
-          <msu-graph [data]="loadedData" [size]="graphSize | async"></msu-graph>
+          <msu-graph
+            [data]="loadedData"
+            [size]="graphSize | async"
+            [showLabel]="[false, !(isXS | async)]"
+            [showAxis]="[!(isXS | async), true]"
+          >
+          </msu-graph>
         </ng-container>
-        <ng-template #loading>
-          <mat-spinner></mat-spinner>
-        </ng-template>
       </mat-tab>
     </mat-tab-group>
   </mat-card>
@@ -50,7 +62,7 @@
       <mat-card-title>Current Profitability</mat-card-title>
       <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
     </mat-card-title-group>
-    <form [formGroup]="filterForm"  fxLayout="column" *ngIf="tablePageData | async; else loading">
+    <form [formGroup]="filterForm"  fxLayout="column">
       <mat-form-field>
         <mat-select
           placeholder="Rig Profile"
@@ -72,7 +84,7 @@
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
-      <mat-table [dataSource]="tablePageData">
+      <mat-table [dataSource]="tablePageData" *ngIf="tablePageData | async; else loading">
         <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
         <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
         <ng-container matColumnDef="name">
