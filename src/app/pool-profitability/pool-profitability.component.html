@@ -4,70 +4,30 @@
   fxLayoutGap="20px"
   fxLayoutGap.lt-lg="10px"
 >
-  <msu-history
-    [minuteData]="minuteData"
-    [hourData]="hourData"
-    [dayData]="dayData"
-    fxLayout="row"
-    fxLayout.lt-lg="column"
-  >
-  </msu-history>
-  <mat-card fxFlex="1 1" fxFlex.lt-lg="100">
+  <mat-card fxFlex="50%" fxFlex.lt-lg="100%" fxLayout="column">
+    <mat-card-title-group>
+      <mat-card-title>Profit History</mat-card-title>
+      <mat-card-subtitle>Review trends for the pools/algorithms shown in the adjacent table</mat-card-subtitle>
+    </mat-card-title-group>
+    <msu-history
+      [minuteData]="minuteData"
+      [hourData]="hourData"
+      [dayData]="dayData"
+      fxFlex="calc(50% - 20px)"
+      fxFlex.lt-lg="100%"
+      fxLayout="row"
+      fxLayout.lt-lg="column"
+    >
+    </msu-history>
+  </mat-card>
+  <mat-card fxFlex="50%" fxFlex.lt-lg="100%" fxLayout="column">
     <mat-card-title-group>
       <mat-card-title>Current Profitability</mat-card-title>
       <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
     </mat-card-title-group>
-    <form [formGroup]="filterForm"  fxLayout="column">
-      <mat-form-field>
-        <mat-select
-          placeholder="Rig Profile"
-          (selectionChange)="rigProfileSelected($event)"
-          [value]="selectedProfile | async"
-        >
-          <ng-container *ngIf="availableRigProfiles | async as rigProfiles">
-            <mat-option *ngFor="let uuid of keys(rigProfiles)" [value]="uuid">
-              {{rigProfiles[uuid].name}}
-            </mat-option>
-          </ng-container>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput [formControlName]="'name'" placeholder="Filter" [matAutocomplete]="auto">
-        <mat-autocomplete #auto="matAutocomplete">
-          <mat-option *ngFor="let option of filterNameOptions | async" [value]="option">
-            {{ option }}
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
-      <mat-table [dataSource]="tablePageData" *ngIf="tablePageData | async; else loading">
-        <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
-        <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef>Pool / Algo</mat-header-cell>
-          <mat-cell *matCellDef="let data">{{ data.name }}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="value">
-          <mat-header-cell *matHeaderCellDef>Profitability (m&#x243;/day)</mat-header-cell>
-          <mat-cell *matCellDef="let data">{{ data.value | number:'1.4-4' }}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="age">
-          <mat-header-cell *matHeaderCellDef>Last Update</mat-header-cell>
-          <mat-cell *matCellDef="let data">{{ data.age }}</mat-cell>
-        </ng-container>
-      </mat-table>
-      <mat-paginator
-        [length]="tablePageTotal | async"
-        [pageSize]="tablePageSize | async"
-        [pageIndex]="tablePageNumber | async"
-        (page)="tablePageChanged($event)"
-      >
-      </mat-paginator>
-    </form>
+    <msu-current
+      (outputs)="saveDataReferences($event)"
+    >
+    </msu-current>
   </mat-card>
 </div>
-
-<ng-template #loading>
-  <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
-    <mat-spinner></mat-spinner>
-  </div>
-</ng-template>
