@@ -1,16 +1,23 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import * as moment from 'moment';
-import { Observable } from 'rxjs/Observable';
-
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSelectChange, PageEvent } from '@angular/material';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
 
 import { MetricsService, PoolAlgoData } from 'app/shared/metrics.service';
 import { RigProfilesService } from 'app/shared/rig-profiles.service';
-import { Algorithm, ALL_ALGORITHMS, ALL_POOLS, Pool, RigProfile } from 'app/shared/schema';
+import {
+  Algorithm,
+  ALL_ALGORITHMS,
+  ALL_POOLS,
+  Pool,
+  PoolCurrent,
+  RigProfile,
+} from 'app/shared/schema';
 
 interface TableData {
   name: string;
@@ -27,19 +34,14 @@ const SORTED_FILTER_NAMES = [
 ]
   .sort();
 
-export interface Outputs {
-  minuteData: Observable<PoolAlgoData[]>;
-  hourData: Observable<PoolAlgoData[]>;
-  dayData: Observable<PoolAlgoData[]>;
-}
-
 @Component({
   selector: 'msu-current',
   styleUrls: ['./current.component.scss'],
   templateUrl: './current.component.html',
 })
-export class CurrentComponent implements OnInit {
-  @Output() public outputs: EventEmitter<Outputs> = new EventEmitter();
+export class CurrentComponent implements OnDestroy {
+  @Output() public currentData: EventEmitter<PoolCurrent[]> = new EventEmitter();
+  @Output() public currentRigProfile: EventEmitter<RigProfile> = new EventEmitter();
 
   public readonly keys: typeof Object.keys = Object.keys;
 
@@ -63,6 +65,8 @@ export class CurrentComponent implements OnInit {
 
   public readonly availableRigProfiles: Observable<{ [uuid: string]: RigProfile }>;
   public readonly selectedProfile: Subject<string> = new Subject<string>();
+
+  private outputSubscription: Subscription;
 
   public constructor(
     private readonly metrics: MetricsService,
@@ -96,22 +100,26 @@ export class CurrentComponent implements OnInit {
           .debounceTime(500),
         this.availableRigProfiles
           .combineLatest(this.selectedProfile)
-          .map(([profiles, selected]) => profiles[selected]),
-      );
+          .map(([profiles, selected]) => profiles[selected])
+          .do((profile) => this.currentRigProfile.next(profile)),
+      )
+        .map(results => results.sort((a, b) => (b.amount.amount || -1) - (a.amount.amount || -1)))
+        .publishReplay(1)
+        .refCount();
 
-    this.tableData = data.minuteData.map(results => {
-      return results
+    this.tableData = data
+      .combineLatest(Observable.interval(10000).startWith(null))
+      .map(([results]) => results
         .map((result): TableData => {
           return {
-            age: result.mostRecent ? moment(result.mostRecent.name).fromNow() : undefined,
+            age: moment(result.timestamp * 1000).fromNow(),
             algo: result.algo,
-            name: result.name,
+            name: `${result.pool} - ${result.algo}`,
             pool: result.pool,
-            value: result.mostRecent ? result.mostRecent.value : undefined,
+            value: result.amount.amount,
           };
-        })
-        .sort((a, b) => (b.value || -1) - (a.value || -1));
-    })
+        }),
+      )
       .publishReplay(1)
       .refCount();
 
@@ -125,24 +133,13 @@ export class CurrentComponent implements OnInit {
       .publishReplay(1)
       .refCount();
 
-    this.dayData = data.dayData
-      .combineLatest(this.tablePageData)
-      .map(([results, tableData]) => results
-        .filter(r => r.series.length > 0)
-        .filter(r => tableData.findIndex(td => td.name === r.name) >= 0),
-    );
-    this.hourData = data.hourData
-      .combineLatest(this.tablePageData)
-      .map(([results, tableData]) => results
-        .filter(r => r.series.length > 0)
-        .filter(r => tableData.findIndex(td => td.name === r.name) >= 0),
-    );
-    this.minuteData = data.minuteData
-      .combineLatest(this.tablePageData)
-      .map(([results, tableData]) => results
-        .filter(r => r.series.length > 0)
-        .filter(r => tableData.findIndex(td => td.name === r.name) >= 0),
-    );
+    this.outputSubscription = data
+      .combineLatest(this.tablePageNumber, this.tablePageSize)
+      .map(([d, page, size]) => d.slice(
+        page * size,
+        (page + 1) * size,
+      ))
+      .subscribe((results) => this.currentData.next(results));
   }
 
   public tablePageChanged(event: PageEvent): void {
@@ -153,11 +150,7 @@ export class CurrentComponent implements OnInit {
     this.selectedProfile.next(event.value);
   }
 
-  public ngOnInit(): void {
-    this.outputs.next({
-      dayData: this.dayData,
-      hourData: this.hourData,
-      minuteData: this.minuteData,
-    });
+  public ngOnDestroy(): void {
+    this.outputSubscription.unsubscribe();
   }
 }

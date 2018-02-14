@@ -10,9 +10,8 @@
       <mat-card-subtitle>Review trends for the pools/algorithms shown in the adjacent table</mat-card-subtitle>
     </mat-card-title-group>
     <msu-history
-      [minuteData]="minuteData"
-      [hourData]="hourData"
-      [dayData]="dayData"
+      [currentData]="currentData"
+      [rigProfile]="rigProfile"
       fxFlex="calc(50% - 20px)"
       fxFlex.lt-lg="100%"
       fxLayout="row"
@@ -26,7 +25,8 @@
       <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
     </mat-card-title-group>
     <msu-current
-      (outputs)="saveDataReferences($event)"
+      (currentData)="updateCurrentData($event)"
+      (currentRigProfile)="updateRigProfile($event)"
     >
     </msu-current>
   </mat-card>

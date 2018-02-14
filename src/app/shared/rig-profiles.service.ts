@@ -4,7 +4,7 @@ import { User } from 'firebase';
 import { Observable } from 'rxjs/Observable';
 
 import { AngularFire2DatabaseAdaptor } from 'app/shared/angular-fire2';
-import { RigProfile } from 'app/shared/schema';
+import { RigProfile, validPath } from 'app/shared/schema';
 
 @Injectable()
 export class RigProfilesService {
@@ -24,8 +24,8 @@ export class RigProfilesService {
     this.rigProfiles = this.userId
       .switchMap(
         (uid) => Observable.combineLatest(
-          this.db.object(['v2', 'user', uid, 'rig-profile']),
-          this.db.object(['v2', 'rig-profile']),
+          this.db.object(validPath(['v2', 'user', uid, 'rig-profile'])),
+          this.db.object(validPath(['v2', 'rig-profile'])),
         ),
       )
       .map(([userProfiles, globalProfiles]) => {
@@ -44,13 +44,13 @@ export class RigProfilesService {
 
   public getRigProfile(profileUuid: string): Observable<RigProfile | null> {
     return this.userId.switchMap(
-      (uid) => this.db.object(['v2', 'user', uid, 'rig-profile', profileUuid])
+      (uid) => this.db.object(validPath(['v2', 'user', uid, 'rig-profile', profileUuid]))
         .switchMap(
           (profile) => profile != null ?
             Observable.of(profile) :
             // If the RigProfile isn't found in the users set of profiles, fallback to globally
             // defined rig profiles.
-            this.db.object(['v2', 'rig-profile', profileUuid]),
+            this.db.object(validPath(['v2', 'rig-profile', profileUuid])),
       ),
     );
   }
@@ -59,7 +59,7 @@ export class RigProfilesService {
     return this.userId
       .switchMap(
         (uid) => this.db
-          .object(['v2', 'user', uid, 'defaults', 'rig-profile'], {}),
+          .object(validPath(['v2', 'user', uid, 'defaults', 'rig-profile']), {}),
       );
   }
 }

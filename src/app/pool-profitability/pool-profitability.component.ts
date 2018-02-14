@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
 
-import { Outputs } from 'app/pool-profitability/current/current.component';
-import { PoolAlgoData } from 'app/shared/metrics.service';
+import { PoolCurrent, RigProfile } from 'app/shared/schema';
 
 @Component({
   selector: 'msu-pool-profitability',
@@ -10,16 +11,24 @@ import { PoolAlgoData } from 'app/shared/metrics.service';
   templateUrl: './pool-profitability.component.html',
 })
 export class PoolProfitabilityComponent {
-  public minuteData: Observable<PoolAlgoData[]>;
-  public hourData: Observable<PoolAlgoData[]>;
-  public dayData: Observable<PoolAlgoData[]>;
+  public readonly currentData: Observable<PoolCurrent[]>;
+  public readonly rigProfile: Observable<RigProfile>;
 
-  public saveDataReferences(outputs: Outputs): void {
-    // Temporarily route all data through CurrentComponent and back into HistoryComponent. This
-    // should ultimately just be a flow of filter criteria (pool/algo tuples) and other variables
-    // rather than all of the data.
-    this.minuteData = outputs.minuteData;
-    this.hourData = outputs.hourData;
-    this.dayData = outputs.dayData;
+  private readonly currentDataSubject: Subject<PoolCurrent[] | undefined> =
+    new BehaviorSubject<PoolCurrent[] | undefined>(undefined);
+  private readonly rigProfileSubject: Subject<RigProfile | undefined> =
+    new BehaviorSubject<RigProfile | undefined>(undefined);
+
+  public constructor() {
+    this.currentData = this.currentDataSubject.filter((v): v is PoolCurrent[] => v != null);
+    this.rigProfile = this.rigProfileSubject.filter((v): v is RigProfile => v != null);
+  }
+
+  public updateCurrentData(outputs: PoolCurrent[]): void {
+    this.currentDataSubject.next(outputs);
+  }
+
+  public updateRigProfile(rigProfile: RigProfile): void {
+    this.rigProfileSubject.next(rigProfile);
   }
 }
