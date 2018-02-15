@@ -13,7 +13,7 @@ import { PoolCurrent, RigProfile } from 'app/shared/schema';
 })
 export class HistoryComponent implements OnInit {
   @Input() public currentData: Observable<PoolCurrent[]>;
-  @Input() public rigProfile: Observable<RigProfile>;
+  @Input() public rigProfileSource: Observable<RigProfile>;
 
   public minuteData: Observable<PoolAlgoData[]>;
   public hourData: Observable<PoolAlgoData[]>;
@@ -37,7 +37,7 @@ export class HistoryComponent implements OnInit {
       .switchMap((datasets) => Observable.combineLatest(
         datasets.map(d => this.metrics.getTimeSeriesProfitabilityStats(
           d,
-          this.rigProfile,
+          this.rigProfileSource,
           'per-minute',
         )),
       ));
@@ -46,7 +46,7 @@ export class HistoryComponent implements OnInit {
       .switchMap((datasets) => Observable.combineLatest(
         datasets.map(d => this.metrics.getTimeSeriesProfitabilityStats(
           d,
-          this.rigProfile,
+          this.rigProfileSource,
           'per-hour',
         )),
       ));
@@ -55,7 +55,7 @@ export class HistoryComponent implements OnInit {
       .switchMap((datasets) => Observable.combineLatest(
         datasets.map(d => this.metrics.getTimeSeriesProfitabilityStats(
           d,
-          this.rigProfile,
+          this.rigProfileSource,
           'per-day',
         )),
       ));

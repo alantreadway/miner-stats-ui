@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 
+import { ContextService } from 'app/shared/context.service';
 import { PoolCurrent, RigProfile } from 'app/shared/schema';
 
 @Component({
@@ -11,17 +12,22 @@ import { PoolCurrent, RigProfile } from 'app/shared/schema';
   templateUrl: './pool-profitability.component.html',
 })
 export class PoolProfitabilityComponent {
+  public readonly rigProfileSource: Observable<RigProfile>;
+  public readonly filterSource: Observable<string | null>;
+
   public readonly currentData: Observable<PoolCurrent[]>;
-  public readonly rigProfile: Observable<RigProfile>;
 
   private readonly currentDataSubject: Subject<PoolCurrent[] | undefined> =
     new BehaviorSubject<PoolCurrent[] | undefined>(undefined);
   private readonly rigProfileSubject: Subject<RigProfile | undefined> =
     new BehaviorSubject<RigProfile | undefined>(undefined);
 
-  public constructor() {
+  public constructor(
+    private readonly context: ContextService,
+  ) {
     this.currentData = this.currentDataSubject.filter((v): v is PoolCurrent[] => v != null);
-    this.rigProfile = this.rigProfileSubject.filter((v): v is RigProfile => v != null);
+    this.rigProfileSource = this.context.getRigProfile();
+    this.filterSource = this.context.getFilter();
   }
 
   public updateCurrentData(outputs: PoolCurrent[]): void {

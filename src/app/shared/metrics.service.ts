@@ -26,8 +26,6 @@ export type PoolAlgoData = TimeseriesDataWithKeys & {
   mostRecent?: TimeseriesDataPoint,
 };
 
-interface ProfitabilityFilter { name: string; }
-
 function convertMinuteData(
   multiplier: number,
 ): (data: PoolAlgoRecord) => TimeseriesDataPoint {
@@ -68,7 +66,7 @@ export class MetricsService {
   }
 
   public getProfitabilityStats(
-    filterSource: Observable<ProfitabilityFilter>,
+    filterSource: Observable<string | null>,
     rigProfile: Observable<RigProfile>,
   ): Observable<PoolCurrent[]> {
     return this.profitabilityStats
@@ -78,8 +76,8 @@ export class MetricsService {
           .filter(
             (result) => {
               const name = `${result.pool} - ${result.algo}`.toLowerCase();
-              const filterName = filter.name && filter.name.toLowerCase();
-              return (!filterName || name.indexOf(filter.name) >= 0);
+              const filterName = filter && filter.toLowerCase();
+              return (!filterName || name.indexOf(filterName) >= 0);
             },
           )
           .map(

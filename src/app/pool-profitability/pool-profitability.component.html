@@ -11,7 +11,7 @@
     </mat-card-title-group>
     <msu-history
       [currentData]="currentData"
-      [rigProfile]="rigProfile"
+      [rigProfileSource]="rigProfileSource"
       fxFlex="calc(50% - 20px)"
       fxFlex.lt-lg="100%"
       fxLayout="row"
@@ -25,6 +25,8 @@
       <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
     </mat-card-title-group>
     <msu-current
+      [rigProfileSource]="rigProfileSource"
+      [filterSource]="filterSource"
       (currentData)="updateCurrentData($event)"
       (currentRigProfile)="updateRigProfile($event)"
     >

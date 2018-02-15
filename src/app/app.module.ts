@@ -8,6 +8,7 @@ import {
   MatCheckboxModule,
   MatFormFieldModule,
   MatGridListModule,
+  MatIconModule,
   MatInputModule,
   MatPaginatorModule,
   MatProgressSpinnerModule,
@@ -26,6 +27,7 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 
 import { AngularFire2DatabaseAdaptor } from 'app/shared/angular-fire2';
+import { ContextService } from 'app/shared/context.service';
 import { MediaQueryService } from 'app/shared/media-query.service';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -77,6 +79,7 @@ const APP_ROUTES: Routes = [
     MatCheckboxModule,
     MatFormFieldModule,
     MatGridListModule,
+    MatIconModule,
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
@@ -89,6 +92,7 @@ const APP_ROUTES: Routes = [
   ],
   providers: [
     AngularFire2DatabaseAdaptor,
+    ContextService,
     MediaQueryService,
     MetricsService,
     RigProfilesService,
