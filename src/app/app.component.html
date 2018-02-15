@@ -9,11 +9,13 @@
   <span>
     <ng-container *ngIf="afAuth.authState | async as user; else showLogin">
       <button
-        mat-button
+        mat-icon-button
         matTooltip="Logout"
         (click)="logout()"
+        class="avatar"
+        ngClass.lt-sm="xs"
       >
-        Logged in as {{ user.displayName }}
+        <img [src]="user.photoURL">
       </button>
     </ng-container>
     <ng-template #showLogin>

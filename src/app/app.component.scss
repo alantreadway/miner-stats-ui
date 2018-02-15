@@ -22,3 +22,15 @@ mat-toolbar {
     top: 56px;
   }
 }
+
+.avatar {
+  img {
+    max-height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  &.xs img {
+    max-height: 36px;
+  }
+}
