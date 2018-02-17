@@ -6,7 +6,8 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
 
-import { MetricsService, PoolAlgoData } from 'app/shared/metrics.service';
+import { MetricsService } from 'app/shared/metrics.service';
+import { pauseWhenInvisible } from 'app/shared/rxjs-util';
 import {
   Algorithm,
   ALL_ALGORITHMS,
@@ -38,11 +39,6 @@ export class CurrentComponent implements OnInit, OnDestroy {
   public readonly pools: Pool[] = ALL_POOLS;
   public readonly algos: Algorithm[] = ALL_ALGORITHMS;
 
-  public readonly minuteData: Observable<PoolAlgoData[]>;
-  public readonly hourData: Observable<PoolAlgoData[]>;
-  public readonly dayData: Observable<PoolAlgoData[]>;
-
-  public tableData: Observable<TableData[]>;
   public tablePageData: Observable<TableData[]>;
   public tablePageNumber: Subject<number> = new BehaviorSubject(0);
   public tablePageSize: Subject<number> = new BehaviorSubject(10);
@@ -67,8 +63,12 @@ export class CurrentComponent implements OnInit, OnDestroy {
         .publishReplay(1)
         .refCount();
 
-    this.tableData = data
-      .combineLatest(Observable.interval(10000).startWith(null))
+    const tableData = data
+      .combineLatest(
+        Observable.interval(10000)
+          .startWith(null),
+      )
+      .debounceTime(100)
       .map(([results]) => results
         .map((result): TableData => {
           return {
@@ -83,13 +83,14 @@ export class CurrentComponent implements OnInit, OnDestroy {
       .publishReplay(1)
       .refCount();
 
-    this.tablePageTotal = this.tableData.map(d => d.length);
-    this.tablePageData = this.tableData
+    this.tablePageTotal = tableData.map(d => d.length);
+    this.tablePageData = tableData
       .combineLatest(this.tablePageNumber, this.tablePageSize)
       .map(([d, page, size]) => d.slice(
         page * size,
         (page + 1) * size,
       ))
+      .pipe(pauseWhenInvisible())
       .publishReplay(1)
       .refCount();
 
@@ -99,6 +100,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
         page * size,
         (page + 1) * size,
       ))
+      .pipe(pauseWhenInvisible())
       .subscribe((results) => this.currentData.next(results));
   }
 

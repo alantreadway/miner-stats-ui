@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { Breakpoint, MediaQueryService } from 'app/shared/media-query.service';
 import { MetricsService, PoolAlgoData } from 'app/shared/metrics.service';
+import { pauseWhenInvisible } from 'app/shared/rxjs-util';
 import { PoolCurrent, RigProfile } from 'app/shared/schema';
 
 @Component({
@@ -42,7 +43,9 @@ export class HistoryComponent implements OnInit {
           this.rigProfileSource,
           'per-minute',
         )),
-      ));
+      ))
+      .debounceTime(100)
+      .pipe(pauseWhenInvisible());
     this.hourData = this.currentData
       .distinctUntilChanged(_.isEqual)
       .switchMap((datasets) => Observable.combineLatest(
@@ -51,7 +54,9 @@ export class HistoryComponent implements OnInit {
           this.rigProfileSource,
           'per-hour',
         )),
-      ));
+      ))
+      .debounceTime(100)
+      .pipe(pauseWhenInvisible());
     this.dayData = this.currentData
       .distinctUntilChanged(_.isEqual)
       .switchMap((datasets) => Observable.combineLatest(
@@ -60,6 +65,10 @@ export class HistoryComponent implements OnInit {
           this.rigProfileSource,
           'per-day',
         )),
+      ))
+      .debounceTime(100)
+      .pipe(pauseWhenInvisible());
+  }
 
   public tabChanged(tab: number): void {
     this.selectedTab = tab;
