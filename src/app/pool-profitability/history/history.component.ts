@@ -19,6 +19,8 @@ export class HistoryComponent implements OnInit {
   public hourData: Observable<PoolAlgoData[]>;
   public dayData: Observable<PoolAlgoData[]>;
 
+  public selectedTab: number = 0;
+
   public isXS: Observable<boolean>;
 
   public constructor(
@@ -58,6 +60,8 @@ export class HistoryComponent implements OnInit {
           this.rigProfileSource,
           'per-day',
         )),
-      ));
+
+  public tabChanged(tab: number): void {
+    this.selectedTab = tab;
   }
 }
