@@ -18,12 +18,19 @@ import { RigProfile } from 'app/shared/schema';
 import { TimeseriesData, TimeseriesDataPoint } from 'app/shared/timeseries.interface';
 import { Dictionary } from 'lodash';
 
+export type PoolCurrentKey = string;
+
 export type TimeseriesDataWithKeys = TimeseriesData & {
+  key: PoolCurrentKey,
   algo: string,
   pool: string,
 };
 export type PoolAlgoData = TimeseriesDataWithKeys & {
   mostRecent?: TimeseriesDataPoint,
+};
+
+export type PoolCurrentWithKey = PoolCurrent & {
+  key: PoolCurrentKey,
 };
 
 function convertMinuteData(
@@ -68,7 +75,7 @@ export class MetricsService {
   public getProfitabilityStats(
     filterSource: Observable<string | null>,
     rigProfile: Observable<RigProfile>,
-  ): Observable<PoolCurrent[]> {
+  ): Observable<PoolCurrentWithKey[]> {
     return this.profitabilityStats
       .combineLatest(filterSource, rigProfile)
       .map(([results, filter, profile]) => {
@@ -81,14 +88,15 @@ export class MetricsService {
             },
           )
           .map(
-            (result) => {
-              const multipler = this.multiplier(result.pool, result.algo, profile);
+            (r) => {
+              const multipler = this.multiplier(r.pool, r.algo, profile);
               return {
-                ...result,
+                ...r,
                 amount: {
-                  ...result.amount,
-                  amount: result.amount.amount * multipler,
+                  ...r.amount,
+                  amount: r.amount.amount * multipler,
                 },
+                key: (isCoinPoolCurrent(r) ? [r.pool, r.coin] : [r.pool, r.algo]).join('/'),
               };
             },
           );
@@ -98,7 +106,7 @@ export class MetricsService {
   }
 
   public getTimeSeriesProfitabilityStats(
-    current: PoolCurrent,
+    current: PoolCurrentWithKey,
     rigProfile: Observable<RigProfile>,
     granularity: keyof PoolProfitability,
   ): Observable<PoolAlgoData> {
@@ -153,7 +161,7 @@ export class MetricsService {
     Z extends keyof PoolProfitability[K],
     T extends PoolProfitability[K][Z]
   >(
-    p: PoolCurrent,
+    p: PoolCurrentWithKey,
     granularityKey: K,
     convertFn: (multiplier: number) => (data: T) => TimeseriesDataPoint,
     limit = 120,
@@ -202,6 +210,7 @@ export class MetricsService {
 
           return {
             algo: p.algo,
+            key: p.key,
             mostRecent: mostRecent != null ? convertFnInstance(mostRecent) : undefined,
             name: `${p.pool} - ${p.algo}`,
             pool: p.pool,

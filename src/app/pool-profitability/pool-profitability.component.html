@@ -9,6 +9,7 @@
     <p>Review trends for the pools/algorithms shown in the adjacent table</p>
     <msu-history
       [currentData]="currentData"
+      [currentHighlight]="currentHighlight"
       [rigProfileSource]="rigProfileSource"
       fxFlex="calc(50% - 20px)"
       fxFlex.lt-lg="100%"
@@ -25,6 +26,7 @@
       [filterSource]="filterSource"
       (currentData)="updateCurrentData($event)"
       (currentRigProfile)="updateRigProfile($event)"
+      (currentHighlight)="updateCurrentHighlight($event)"
     >
     </msu-current>
   </div>

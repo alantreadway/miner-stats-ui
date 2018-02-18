@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
 
-import { MetricsService } from 'app/shared/metrics.service';
+import { MetricsService, PoolCurrentKey } from 'app/shared/metrics.service';
 import { pauseWhenInvisible } from 'app/shared/rxjs-util';
 import {
   Algorithm,
@@ -18,6 +18,7 @@ import {
 } from 'app/shared/schema';
 
 interface TableData {
+  key: PoolCurrentKey;
   name: string;
   pool: string;
   algo: string;
@@ -35,6 +36,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
   @Input() public filterSource: Observable<string | null>;
 
   @Output() public currentData: EventEmitter<PoolCurrent[]> = new EventEmitter();
+  @Output() public currentHighlight: EventEmitter<PoolCurrentKey[]> = new EventEmitter();
 
   public readonly pools: Pool[] = ALL_POOLS;
   public readonly algos: Algorithm[] = ALL_ALGORITHMS;
@@ -74,6 +76,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
           return {
             age: moment(result.timestamp * 1000).fromNow(),
             algo: result.algo,
+            key: result.key,
             name: `${result.pool} - ${result.algo}`,
             pool: result.pool,
             value: result.amount.amount,
@@ -110,5 +113,13 @@ export class CurrentComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.outputSubscription.unsubscribe();
+  }
+
+  public highlight(data: TableData): void {
+    this.currentHighlight.next([data.key]);
+  }
+
+  public unhighlight(data: TableData): void {
+    this.currentHighlight.next([]);
   }
 }

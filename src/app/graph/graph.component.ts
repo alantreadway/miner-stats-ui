@@ -8,13 +8,16 @@ import { TimeseriesData } from 'app/shared/timeseries.interface';
 })
 export class GraphComponent implements OnChanges {
   @Input() public size: [number, number];
+  @Input() public highlight?: TimeseriesData[];
   @Input() public data?: TimeseriesData[];
   @Input() public showAxis?: [boolean, boolean];
   @Input() public showLabel?: [boolean, boolean];
 
   public displayData: TimeseriesData[] = [];
+  public highlightData: TimeseriesData[] = [];
 
   public ngOnChanges(): void {
-    this.displayData = [...(this.data || [])];
+    this.displayData = this.data || [];
+    this.highlightData = this.highlight || [];
   }
 }

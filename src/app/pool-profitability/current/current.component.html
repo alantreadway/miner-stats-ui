@@ -1,5 +1,11 @@
 <div fxLayout="row wrap" fxLayoutAlign="center" *ngIf="tablePageData | async as loadedPageData; else loading">
-  <mat-card *ngFor="let data of loadedPageData" fxFlex="300px" class="price-card">
+  <mat-card
+    *ngFor="let data of loadedPageData"
+    fxFlex="300px"
+    class="price-card"
+    (mouseenter)="highlight(data)"
+    (mouseleave)="unhighlight(data)"
+  >
     <mat-card-title-group>
       <mat-card-title>{{data.algo}}</mat-card-title>
       <mat-card-subtitle>{{data.pool}}</mat-card-subtitle>
