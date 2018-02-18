@@ -9,7 +9,7 @@
       <span fxShow fxHide.lt-sm>{{ dataset.title }}</span>
       <span fxHide fxShow.lt-sm>{{ dataset.shortTitle }}</span>
     </ng-template>
-    <ng-container *ngIf="selectedTab === tabIndex && dataset.data | async as loadedData; else loading">
+    <ng-container *ngIf="dataset.data | async as loadedData; else loading">
       <msu-graph
         [size]="[dimensions.value[0], dimensions.value[0] * 0.75]"
         [data]="loadedData"
