@@ -12,6 +12,7 @@ import {
   Algorithm,
   ALL_ALGORITHMS,
   ALL_POOLS,
+  isCoinPoolCurrent,
   Pool,
   PoolCurrent,
   RigProfile,
@@ -22,6 +23,7 @@ interface TableData {
   name: string;
   pool: string;
   algo: string;
+  coin?: string;
   value?: number;
   age?: string;
 }
@@ -76,6 +78,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
           return {
             age: moment(result.timestamp * 1000).fromNow(),
             algo: result.algo,
+            coin: isCoinPoolCurrent(result) ? result.coin : undefined,
             key: result.key,
             name: `${result.pool} - ${result.algo}`,
             pool: result.pool,
