@@ -4,11 +4,9 @@
   fxLayoutGap="20px"
   fxLayoutGap.lt-lg="10px"
 >
-  <mat-card fxFlex="50%" fxFlex.lt-lg="100%" fxLayout="column">
-    <mat-card-title-group>
-      <mat-card-title>Profit History</mat-card-title>
-      <mat-card-subtitle>Review trends for the pools/algorithms shown in the adjacent table</mat-card-subtitle>
-    </mat-card-title-group>
+  <div fxFlex="50%" fxFlex.lt-lg="100%" fxLayout="column">
+    <h1>Profit History</h1>
+    <p>Review trends for the pools/algorithms shown in the adjacent table</p>
     <msu-history
       [currentData]="currentData"
       [rigProfileSource]="rigProfileSource"
@@ -18,12 +16,10 @@
       fxLayout.lt-lg="column"
     >
     </msu-history>
-  </mat-card>
-  <mat-card fxFlex="50%" fxFlex.lt-lg="100%" fxLayout="column">
-    <mat-card-title-group>
-      <mat-card-title>Current Profitability</mat-card-title>
-      <mat-card-subtitle>Recent data collected from pools, adjusted for your rigs hashrate</mat-card-subtitle>
-    </mat-card-title-group>
+  </div>
+  <div fxFlex="50%" fxFlex.lt-lg="100%" fxLayout="column">
+    <h1>Current Profitability</h1>
+    <p>Recent data collected from pools, adjusted for your rigs hashrate</p>
     <msu-current
       [rigProfileSource]="rigProfileSource"
       [filterSource]="filterSource"
@@ -31,5 +27,5 @@
       (currentRigProfile)="updateRigProfile($event)"
     >
     </msu-current>
-  </mat-card>
+  </div>
 </div>

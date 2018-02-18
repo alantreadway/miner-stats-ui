@@ -1,19 +1,19 @@
-<mat-table [dataSource]="tablePageData" *ngIf="tablePageData | async; else loading">
-  <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
-  <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
-  <ng-container matColumnDef="name">
-    <mat-header-cell *matHeaderCellDef>Pool / Algo</mat-header-cell>
-    <mat-cell *matCellDef="let data">{{ data.name }}</mat-cell>
-  </ng-container>
-  <ng-container matColumnDef="value">
-    <mat-header-cell *matHeaderCellDef>Profitability (m&#x243;/day)</mat-header-cell>
-    <mat-cell *matCellDef="let data">{{ data.value | number:'1.4-4' }}</mat-cell>
-  </ng-container>
-  <ng-container matColumnDef="age">
-    <mat-header-cell *matHeaderCellDef>Last Update</mat-header-cell>
-    <mat-cell *matCellDef="let data">{{ data.age }}</mat-cell>
-  </ng-container>
-</mat-table>
+<div fxLayout="row wrap" fxLayoutAlign="center" *ngIf="tablePageData | async as loadedPageData; else loading">
+  <mat-card *ngFor="let data of loadedPageData" fxFlex="300px" class="price-card">
+    <mat-card-title-group>
+      <mat-card-title>{{data.algo}}</mat-card-title>
+      <mat-card-subtitle>{{data.pool}}</mat-card-subtitle>
+    </mat-card-title-group>
+    <mat-card-content fxLayout="row">
+      <div fxFlex="50%">
+        {{ data.value | number:'1.4-4' }} m&#x243;/day
+      </div>
+      <div fxFlex="50%" fxLayoutAlign="end">
+        {{ data.age }}
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
 <mat-paginator [length]="tablePageTotal | async" [pageSize]="tablePageSize | async" [pageIndex]="tablePageNumber | async"
   (page)="tablePageChanged($event)">
 </mat-paginator>
