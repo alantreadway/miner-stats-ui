@@ -49,8 +49,8 @@ function convertRollupData(
 ): (data: PoolAlgoRollupRecord) => TimeseriesDataPoint {
   return (r) => {
     return {
-      max: r.max.amount * multiplier,
-      min: r.min.amount * multiplier,
+      // max: r.max.amount * multiplier,
+      // min: r.min.amount * multiplier,
       name: new Date((r.timestamp || 0) * 1000),
       value: (r.sum.amount / r.count) * multiplier,
     };
