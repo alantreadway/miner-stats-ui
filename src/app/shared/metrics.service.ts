@@ -227,14 +227,18 @@ export class MetricsService {
     );
   }
 
-  private multiplier(pool: Pool, algo: Algorithm, rigProfile: RigProfile): number {
+  public getBaseUnitsFor(algo: Algorithm): number {
     let spdDivisor = 1e6; // MH
-    if (algo === 'blake2s' || algo === 'blakecoin') {
+    if (algo === 'blake2s' || algo === 'blakecoin' || algo === 'qubit') {
       spdDivisor = 1e9; // GH
     }
     if (algo === 'yescrypt') {
       spdDivisor = 1e3; // KH
     }
-    return ((rigProfile.hashrates[algo] || 0) * 1000000) / spdDivisor;
+    return spdDivisor;
+  }
+
+  private multiplier(pool: Pool, algo: Algorithm, rigProfile: RigProfile): number {
+    return ((rigProfile.hashrates[algo] || 0) * 1000000) / this.getBaseUnitsFor(algo);
   }
 }

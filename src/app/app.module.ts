@@ -6,6 +6,7 @@ import {
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDialogModule,
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
@@ -31,10 +32,12 @@ import { ContextService } from 'app/shared/context.service';
 import { MediaQueryService } from 'app/shared/media-query.service';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
+import { ContextComponent } from './context/context.component';
 import { GraphComponent } from './graph/graph.component';
 import { CurrentComponent } from './pool-profitability/current/current.component';
 import { HistoryComponent } from './pool-profitability/history/history.component';
 import { PoolProfitabilityComponent } from './pool-profitability/pool-profitability.component';
+import { RigProfileEditorComponent } from './rig-profile-editor/rig-profile-editor.component';
 import { DimensionsDirective } from './shared/dimensions.directive';
 import { MetricsService } from './shared/metrics.service';
 import { RigProfilesService } from './shared/rig-profiles.service';
@@ -62,6 +65,11 @@ const APP_ROUTES: Routes = [
     HistoryComponent,
     CurrentComponent,
     DimensionsDirective,
+    ContextComponent,
+    RigProfileEditorComponent,
+  ],
+  entryComponents: [
+    RigProfileEditorComponent,
   ],
   imports: [
     BrowserModule,
@@ -77,6 +85,7 @@ const APP_ROUTES: Routes = [
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatGridListModule,
     MatIconModule,

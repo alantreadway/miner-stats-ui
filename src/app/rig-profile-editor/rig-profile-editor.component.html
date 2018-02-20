@@ -1,0 +1,33 @@
+<h1 mat-dialog-title>
+  Edit Rig Profile
+</h1>
+
+<mat-dialog-content>
+  <form [formGroup]="form" fxLayout="row wrap" fxLayoutGap="10px">
+    <mat-form-field fxFlex="100%">
+      <input matInput [formControlName]="'name'" placeholder="Name">
+    </mat-form-field>
+    <ng-container *ngFor="let algo of ALL_ALGORITHMS">
+      <mat-form-field
+        fxFlex="0 0 calc(20% - 10px)"
+        fxFlex.lt-lg="0 0 calc(33.3% - 10px)"
+        fxFlex.lt-md="0 0 calc(50% - 10px)"
+        fxFlex.lt-sm="0 0 calc(100% - 10px)"
+      >
+        <input matInput [formControlName]="algo" [placeholder]="algo + ' hashrate'" type="number" min="0">
+        <span matSuffix>
+          <ng-container [ngSwitch]="scales[algo]">
+            <ng-container *ngSwitchCase="1">H</ng-container>
+            <ng-container *ngSwitchCase="1000">KH</ng-container>
+            <ng-container *ngSwitchCase="1000000">MH</ng-container>
+            <ng-container *ngSwitchCase="1000000000">GH</ng-container>
+          </ng-container>
+        </span>
+      </mat-form-field>
+    </ng-container>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions fxLayout="row">
+  <button mat-button mat-dialog-close fxFlexAlign="start">CANCEL</button>
+  <button mat-button color="primary" fxFlexAlign="end" (click)="save($event)">SAVE</button>
+</mat-dialog-actions>

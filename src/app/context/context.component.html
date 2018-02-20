@@ -1,0 +1,23 @@
+<form [formGroup]="filterForm" fxLayout="row" fxLayoutGap="15px">
+  <mat-form-field fxFlex="50%" color="warning" floatLabel="never">
+    <mat-select placeholder="Rig Profile" (selectionChange)="rigProfileSelected($event)" [value]="rigProfileUuid | async">
+      <ng-container *ngIf="rigProfilesAvailable | async as rigProfiles">
+        <mat-option *ngFor="let uuid of keys(rigProfiles)" [value]="uuid">
+          {{rigProfiles[uuid].name}}
+        </mat-option>
+      </ng-container>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button (click)="editRigProfile($event)">EDIT</button>
+  <mat-form-field fxFlex="50%" floatLabel="never">
+    <input matInput [formControlName]="'name'" placeholder="Filter" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let option of filterNameOptions | async" [value]="option">
+        {{ option }}
+      </mat-option>
+    </mat-autocomplete>
+    <button mat-button *ngIf="filterForm.value.name" matSuffix mat-icon-button (click)="clearFilter($event)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+</form>

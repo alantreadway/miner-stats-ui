@@ -55,6 +55,17 @@ export class RigProfilesService {
     );
   }
 
+  public saveRigProfile(profileUuid: string, profile: RigProfile): Observable<void> {
+    return this.userId.switchMap(
+      (uid) => {
+        const path = validPath(['v2', 'user', uid, 'rig-profile', profileUuid]);
+        return Observable.fromPromise(
+          this.db.setObject(path, profile),
+        );
+      },
+    );
+  }
+
   public getDefaultRigProfile(): Observable<string | null> {
     return this.userId
       .switchMap(

@@ -43,4 +43,9 @@ export class AngularFire2DatabaseAdaptor {
     return this.db.object<T>(key.path.join('/'))
       .valueChanges();
   }
+
+  public setObject<T>(key: ValidPath<T>, value: T): Promise<void> {
+    return this.db.database.ref(key.path.join('/'))
+      .set(value);
+  }
 }
