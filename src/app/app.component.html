@@ -1,35 +1,41 @@
 <mat-toolbar
   color="primary"
   class="mat-elevation-z6"
-  fxLayout="row"
-  fxLayoutGap="10px"
 >
-  <span fxFlex="150px" fxHide.lt-sm>
-    <a mat-button [routerLink]=""><h1>Miner Stats</h1></a>
-  </span>
+  <div
+    class="toolbar-content"
+    fxLayout="row"
+    fxLayoutGap="10px"
+    fxLayoutAlign="center center"
+  >
 
-  <!-- This fills the remaining space of the current row -->
-  <span fxFlex="calc(100% - 210px)">
-    <msu-context></msu-context>
-  </span>
+    <span fxFlex="150px" fxHide.lt-sm>
+      <a mat-button [routerLink]=""><h1>Miner Stats</h1></a>
+    </span>
 
-  <span fxFlex="40px" fxLayout="row">
-    <ng-container *ngIf="afAuth.authState | async as user; else showLogin">
-      <button
-        mat-icon-button
-        matTooltip="Logout"
-        (click)="logout()"
-        class="avatar"
-        ngClass.lt-sm="xs"
-        fxLayoutAlign="end center"
-      >
-        <img [src]="user.photoURL">
-      </button>
-    </ng-container>
-    <ng-template #showLogin>
-      <button mat-button (click)="login()">Login</button>
-    </ng-template>
-  </span>
+    <!-- This fills the remaining space of the current row -->
+    <span fxFlex="calc(100% - 210px)">
+      <msu-context></msu-context>
+    </span>
+
+    <span fxFlex="40px" fxLayout="row">
+      <ng-container *ngIf="afAuth.authState | async as user; else showLogin">
+        <button
+          mat-icon-button
+          matTooltip="Logout"
+          (click)="logout()"
+          class="avatar"
+          ngClass.lt-sm="xs"
+          fxLayoutAlign="end center"
+        >
+          <img [src]="user.photoURL">
+        </button>
+      </ng-container>
+      <ng-template #showLogin>
+        <button mat-button (click)="login()">Login</button>
+      </ng-template>
+    </span>
+  </div>
 </mat-toolbar>
 
 <div class="content" ngClass.lt-sm="xs">

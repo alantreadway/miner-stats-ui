@@ -1,5 +1,5 @@
-<form [formGroup]="filterForm" fxLayout="row" fxLayoutGap="15px">
-  <mat-form-field fxFlex="50%" color="warning" floatLabel="never">
+<form [formGroup]="filterForm" fxLayout="row" fxLayoutGap="15px" fxLayoutAlign="center center">
+  <mat-form-field fxFlex="calc(50% - 100px)" color="warning" floatLabel="never">
     <mat-select placeholder="Rig Profile" (selectionChange)="rigProfileSelected($event)" [value]="rigProfileUuid | async">
       <ng-container *ngIf="rigProfilesAvailable | async as rigProfiles">
         <mat-option *ngFor="let uuid of keys(rigProfiles)" [value]="uuid">
@@ -8,7 +8,9 @@
       </ng-container>
     </mat-select>
   </mat-form-field>
-  <button mat-button (click)="editRigProfile($event)">EDIT</button>
+  <div fxFlex="100px" fxHide.lt-md>
+    <button mat-button (click)="editRigProfile($event)">EDIT</button>
+  </div>
   <mat-form-field fxFlex="50%" floatLabel="never">
     <input matInput [formControlName]="'name'" placeholder="Filter" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete">

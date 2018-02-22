@@ -10,12 +10,20 @@ mat-toolbar {
   left: 0;
   right: 0;
   z-index: 2;
+
+  .toolbar-content {
+    width: calc(100% - 20px);
+    max-width: 1200px;
+    margin: auto;
+  }
 }
 
 .content {
   position: relative;
   top: 64px;
   width: calc(100% - 20px);
+  max-width: 1200px;
+  margin: auto;
   height: calc(100% - 20px);
   padding: 10px;
 
