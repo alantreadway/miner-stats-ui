@@ -28,6 +28,13 @@
   </form>
 </mat-dialog-content>
 <mat-dialog-actions fxLayout="row">
-  <button mat-button mat-dialog-close fxFlexAlign="start">CANCEL</button>
-  <button mat-button color="primary" fxFlexAlign="end" (click)="save($event)">SAVE</button>
+  <div fxFlex="33%" fxLayoutAlign="start">
+    <button mat-button mat-dialog-close>CANCEL</button>
+  </div>
+  <div fxFlex="34%" fxLayoutAlign="center">
+    <button mat-button (click)="clone($event)">CLONE</button>
+  </div>
+  <div fxFlex="33%" fxLayoutAlign="end">
+    <button mat-button color="primary" (click)="save($event)">SAVE</button>
+  </div>
 </mat-dialog-actions>

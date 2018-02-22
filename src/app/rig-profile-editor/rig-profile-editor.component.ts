@@ -59,11 +59,15 @@ export class RigProfileEditorComponent {
     });
   }
 
-  public save(event: Event): void {
+  public clone(event: Event): void {
+    this.save(event, uuid.v4(), `Clone of ${this.form.value.name}`);
+  }
+
+  public save(event: Event, overrideUuid?: string, overrideName?: string): void {
     event.stopPropagation();
 
     const formValue = this.form.value;
-    const profileUuid = this.data.uuid || uuid.v4();
+    const profileUuid = overrideUuid || this.data.uuid || uuid.v4();
     const profile = ALL_ALGORITHMS
       .reduce(
         (result, next) => {
@@ -74,7 +78,7 @@ export class RigProfileEditorComponent {
         },
         {
           hashrates: {},
-          name: formValue.name,
+          name: overrideName || formValue.name,
         } as RigProfile,
       );
 
