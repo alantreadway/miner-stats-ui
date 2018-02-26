@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-// import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
 
 import { AngularFire2DatabaseAdaptor } from 'app/shared/angular-fire2';

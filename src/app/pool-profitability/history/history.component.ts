@@ -65,15 +65,25 @@ export class HistoryComponent implements OnInit {
     granularity: keyof PoolProfitability,
   ): { data: Observable<PoolAlgoData[]>, highlight: Observable<PoolAlgoData[]> } {
     const data = this.currentData
-        .distinctUntilChanged(_.isEqual)
-        .switchMap((datasets) => Observable.combineLatest(
-          datasets.map(d => this.metrics.getTimeSeriesProfitabilityStats(
-            d,
-            this.rigProfileSource,
-            granularity,
-          )),
-        ))
-        .debounceTime(100);
+      .distinctUntilChanged(_.isEqual)
+      .switchMap((datasets) => Observable.combineLatest(
+        datasets.map(d => this.metrics.getTimeSeriesProfitabilityStats(
+          d,
+          this.rigProfileSource,
+          granularity,
+        )),
+      ))
+      .map((datasets) => datasets.map((dataset) => {
+        const cutoff = granularity === 'per-minute' ? 120 * 60 :
+          granularity === 'per-hour' ? 48 * 60 * 60 :
+          granularity === 'per-day' ? 30 * 24 * 60 * 60 :
+          0;
+        return {
+          ...dataset,
+          series: dataset.series.filter((v) => v.name.getTime() >= (Date.now() - cutoff * 1000)),
+        };
+      }))
+      .debounceTime(50);
 
     return {
       data: data.pipe(pauseWhenInvisible()),
