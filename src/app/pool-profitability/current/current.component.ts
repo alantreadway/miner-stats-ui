@@ -26,6 +26,7 @@ interface TableData {
   coin?: string;
   value?: number;
   age?: string;
+  poolWorkerProportion?: number;
 }
 
 @Component({
@@ -82,6 +83,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
             key: result.key,
             name: `${result.pool} - ${result.algo}`,
             pool: result.pool,
+            poolWorkerProportion: result.poolWorkerProportion,
             value: result.amount.amount,
           };
         }),

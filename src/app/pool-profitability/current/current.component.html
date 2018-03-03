@@ -12,6 +12,9 @@
       <p fxFlex="50%">{{data.pool}}</p>
       <p fxFlex="50%" fxLayoutAlign="end">m&#x243;/day</p>
       <p fxFlex="50%">
+        <ng-container *ngIf="data.poolWorkerProportion != null">
+          {{ data.poolWorkerProportion | percent }} of workers
+        </ng-container>
       </p>
       <small fxFlex="50%" fxLayoutAlign="end">
         {{ data.age }}

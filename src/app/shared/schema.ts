@@ -157,12 +157,14 @@ export type AlgoPoolTree = {
 export interface AlgoPoolCurrent extends PoolAlgoRecord {
   pool: AlgoFocusedPool;
   algo: Algorithm;
+  poolWorkerProportion?: number;
 }
 
 export interface CoinPoolCurrent extends PoolAlgoRecord {
   pool: CoinFocusedPool;
   coin: DigitalCurrency;
   algo: Algorithm;
+  poolWorkerProportion?: number;
 }
 
 export type PoolCurrent = AlgoPoolCurrent | CoinPoolCurrent;
