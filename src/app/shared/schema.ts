@@ -135,10 +135,16 @@ export interface RigProfile {
   name: string;
   hashrates: {[algo in Algorithm]?: number };
 }
+export type PoolWallets = {
+  [pool in Pool]: {
+    'BTC': string;
+  };
+};
 export interface UserProfile {
   defaults: {
     'rig-profile': string;
   };
+  'pool-wallet': PoolWallets;
   'rig-profile': {
     [profileUuid: string]: RigProfile;
   };
