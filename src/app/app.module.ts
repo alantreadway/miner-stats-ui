@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -30,6 +31,7 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFire2DatabaseAdaptor } from 'app/shared/angular-fire2';
 import { ContextService } from 'app/shared/context.service';
 import { MediaQueryService } from 'app/shared/media-query.service';
+import { WalletsService } from 'app/shared/wallets.service';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { ContextComponent } from './context/context.component';
@@ -38,9 +40,11 @@ import { CurrentComponent } from './pool-profitability/current/current.component
 import { HistoryComponent } from './pool-profitability/history/history.component';
 import { PoolProfitabilityComponent } from './pool-profitability/pool-profitability.component';
 import { RigProfileEditorComponent } from './rig-profile-editor/rig-profile-editor.component';
+import { DigitalCurrencyPipe } from './shared/digital-currency.pipe';
 import { DimensionsDirective } from './shared/dimensions.directive';
 import { MetricsService } from './shared/metrics.service';
 import { RigProfilesService } from './shared/rig-profiles.service';
+import { WalletComponent } from './wallet/wallet.component';
 
 const APP_ROUTES: Routes = [
   { path: 'pool-profitability', component: PoolProfitabilityComponent },
@@ -67,6 +71,8 @@ const APP_ROUTES: Routes = [
     DimensionsDirective,
     ContextComponent,
     RigProfileEditorComponent,
+    WalletComponent,
+    DigitalCurrencyPipe,
   ],
   entryComponents: [
     RigProfileEditorComponent,
@@ -77,6 +83,7 @@ const APP_ROUTES: Routes = [
     RouterModule.forRoot(APP_ROUTES),
     ReactiveFormsModule,
     FormsModule,
+    HttpClientModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
@@ -105,6 +112,7 @@ const APP_ROUTES: Routes = [
     MediaQueryService,
     MetricsService,
     RigProfilesService,
+    WalletsService,
   ],
 })
 export class AppModule { }

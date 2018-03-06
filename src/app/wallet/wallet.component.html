@@ -1,0 +1,25 @@
+<div
+  fxLayout="row wrap"
+  fxLayoutAlign="center"
+  fxLayoutGap="20px"
+  *ngIf="balances | async as loadedBalances; else loading"
+>
+  <ng-container *ngFor="let pool of keys(loadedBalances)">
+    <ng-container *ngIf="loadedBalances[pool] as amount">
+      <mat-card fxFlex="250px">
+        <mat-card-content fxLayout="row wrap">
+          <h3 fxFlex="50%">{{ pool }}</h3>
+          <h3 fxFlex="50%" fxLayoutAlign="end">
+            {{ amount | digitalCurrency }}
+          </h3>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
+  </ng-container>
+</div>
+
+<ng-template #loading>
+  <div fxFlexFill fxLayout="column" fxLayoutAlign="center center">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

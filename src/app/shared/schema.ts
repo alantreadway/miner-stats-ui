@@ -94,6 +94,11 @@ export type Pool = AlgoFocusedPool | CoinFocusedPool;
 export const ALL_POOLS = Object.keys(ALGO_FOCUSED_POOLS)
   .concat(Object.keys(COIN_FOCUSED_POOLS)) as Pool[];
 
+export function isPool(unknown: string): unknown is Pool {
+  // tslint:disable-next-line:no-any
+  return ALL_POOLS.indexOf(unknown as any) >= 0;
+}
+
 export type SecondsSinceEpoch = number;
 
 export type DigitalCurrency = 'BTC' | 'ETC' | 'ETH' | 'ETN' | 'PASC' | 'SIA' | 'XMR' | 'ZEC';
