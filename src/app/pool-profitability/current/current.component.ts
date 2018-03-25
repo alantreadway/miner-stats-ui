@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { PageEvent } from '@angular/material';
+import * as _ from 'lodash';
 import * as moment from 'moment';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
@@ -12,21 +13,30 @@ import {
   Algorithm,
   ALL_ALGORITHMS,
   ALL_POOLS,
+  DigitalCurrency,
+  isAlgoFocusedPool,
+  isAlgoPoolBookmark,
+  isAlgoPoolCurrent,
+  isCoinFocusedPool,
+  isCoinPoolBookmark,
   isCoinPoolCurrent,
   Pool,
   PoolCurrent,
   RigProfile,
+  UserProfile,
 } from 'app/shared/schema';
+import { BookmarksService } from '../../shared/bookmarks.service';
 
 interface TableData {
   key: PoolCurrentKey;
   name: string;
   pool: string;
-  algo: string;
-  coin?: string;
+  algo: Algorithm;
+  coin?: DigitalCurrency;
   value?: number;
   age?: string;
   poolWorkerProportion?: number;
+  bookmark?: UserProfile['bookmarks']['pools'][0];
 }
 
 @Component({
@@ -55,6 +65,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
 
   public constructor(
     private readonly metrics: MetricsService,
+    private readonly bookmarks: BookmarksService,
   ) {
   }
 
@@ -64,7 +75,38 @@ export class CurrentComponent implements OnInit, OnDestroy {
         this.filterSource.debounceTime(500),
         this.rigProfileSource,
       )
-        .map(results => results.sort((a, b) => (b.amount.amount || -1) - (a.amount.amount || -1)))
+        .combineLatest(this.bookmarks.getPoolCoinsOrAlgos())
+        .map(([results, bookmarks]) => {
+          // Join results with bookmarks.
+          return results.map((result) => {
+            return {
+              ...result,
+              bookmark: bookmarks.find((bookmark) => {
+                if (bookmark.pool !== result.pool) {
+                  return false;
+                }
+
+                if (isCoinPoolBookmark(bookmark) && isCoinPoolCurrent(result)) {
+                  return bookmark.coin === result.coin;
+                }
+
+                if (isAlgoPoolBookmark(bookmark) && isAlgoPoolCurrent(result)) {
+                  return bookmark.algo === result.algo;
+                }
+
+                return false;
+              }),
+            };
+          });
+        })
+        .map(
+          (results) => _(results)
+            .sortBy(
+              (r) => (r.bookmark ? 0 : 1),
+              (r) => -1 * (r.amount.amount || -1),
+            )
+            .value(),
+        )
         .publishReplay(1)
         .refCount();
 
@@ -79,6 +121,7 @@ export class CurrentComponent implements OnInit, OnDestroy {
           return {
             age: moment(result.timestamp * 1000).fromNow(),
             algo: result.algo,
+            bookmark: result.bookmark,
             coin: isCoinPoolCurrent(result) ? result.coin : undefined,
             key: result.key,
             name: `${result.pool} - ${result.algo}`,
@@ -114,6 +157,24 @@ export class CurrentComponent implements OnInit, OnDestroy {
 
   public tablePageChanged(event: PageEvent): void {
     this.tablePageNumber.next(event.pageIndex);
+  }
+
+  public toggleBookmark(data: TableData): void {
+    const pool = data.pool;
+
+    if (data.bookmark != null) {
+      this.bookmarks.removePoolCoinsOrAlgos(data.bookmark)
+        .take(1)
+        .subscribe();
+    } else if (isCoinFocusedPool(pool) && data.coin != null) {
+      this.bookmarks.addPoolCoinsOrAlgos({ pool, coin: data.coin })
+        .take(1)
+        .subscribe();
+    } else if (isAlgoFocusedPool(pool)) {
+      this.bookmarks.addPoolCoinsOrAlgos({ pool, algo: data.algo })
+        .take(1)
+        .subscribe();
+    }
   }
 
   public ngOnDestroy(): void {

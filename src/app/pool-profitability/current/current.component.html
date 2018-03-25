@@ -15,10 +15,16 @@
         <ng-container *ngIf="data.poolWorkerProportion != null">
           {{ data.poolWorkerProportion | percent }} of workers
         </ng-container>
+        <small>{{ data.age }}</small>
       </p>
-      <small fxFlex="50%" fxLayoutAlign="end">
-        {{ data.age }}
-      </small>
+      <p fxFlex="50%" fxLayoutAlign="end">
+        <button mat-icon-button (click)="toggleBookmark(data)">
+          <mat-icon *ngIf="data.bookmark != null; else notBookmarked">turned_in</mat-icon>
+          <ng-template #notBookmarked>
+            <mat-icon>turned_in_not</mat-icon>
+          </ng-template>
+        </button>
+      </p>
     </mat-card-content>
   </mat-card>
 </div>

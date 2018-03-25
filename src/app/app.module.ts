@@ -40,6 +40,7 @@ import { CurrentComponent } from './pool-profitability/current/current.component
 import { HistoryComponent } from './pool-profitability/history/history.component';
 import { PoolProfitabilityComponent } from './pool-profitability/pool-profitability.component';
 import { RigProfileEditorComponent } from './rig-profile-editor/rig-profile-editor.component';
+import { BookmarksService } from './shared/bookmarks.service';
 import { DigitalCurrencyPipe } from './shared/digital-currency.pipe';
 import { DimensionsDirective } from './shared/dimensions.directive';
 import { MetricsService } from './shared/metrics.service';
@@ -109,6 +110,7 @@ const APP_ROUTES: Routes = [
   providers: [
     AngularFire2DatabaseAdaptor,
     ContextService,
+    BookmarksService,
     MediaQueryService,
     MetricsService,
     RigProfilesService,

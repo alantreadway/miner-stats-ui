@@ -39,13 +39,23 @@ export class AngularFire2DatabaseAdaptor {
       .valueChanges();
   }
 
+  public async insertObject<T>(key: ValidPathForList<T>, value: T): Promise<void> {
+    await this.db.database.ref(key.path.join('/'))
+      .push(value);
+  }
+
+  public async removeObject<T>(key: ValidPath<T>): Promise<void> {
+    await this.db.object<T>(key.path.join('/'))
+      .remove();
+  }
+
   public object<T>(key: ValidPath<T>, options: ObjectOptions = {}): Observable<T | null> {
     return this.db.object<T>(key.path.join('/'))
       .valueChanges();
   }
 
-  public setObject<T>(key: ValidPath<T>, value: T): Promise<void> {
-    return this.db.database.ref(key.path.join('/'))
+  public async setObject<T>(key: ValidPath<T>, value: T): Promise<void> {
+    await this.db.database.ref(key.path.join('/'))
       .set(value);
   }
 }

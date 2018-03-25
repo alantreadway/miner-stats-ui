@@ -1,3 +1,5 @@
+import { Dictionary } from 'lodash';
+
 const ALGORITHMS = {
   axiom: true,
   bastion: true,
@@ -94,6 +96,14 @@ export type Pool = AlgoFocusedPool | CoinFocusedPool;
 export const ALL_POOLS = Object.keys(ALGO_FOCUSED_POOLS)
   .concat(Object.keys(COIN_FOCUSED_POOLS)) as Pool[];
 
+export function isCoinFocusedPool(unknown: string): unknown is CoinFocusedPool {
+  return Object.keys(COIN_FOCUSED_POOLS).indexOf(unknown) >= 0;
+}
+
+export function isAlgoFocusedPool(unknown: string): unknown is AlgoFocusedPool {
+  return Object.keys(ALGO_FOCUSED_POOLS).indexOf(unknown) >= 0;
+}
+
 export function isPool(unknown: string): unknown is Pool {
   // tslint:disable-next-line:no-any
   return ALL_POOLS.indexOf(unknown as any) >= 0;
@@ -149,6 +159,17 @@ export interface UserProfile {
   defaults: {
     'rig-profile': string;
   };
+  bookmarks: {
+    pools: Dictionary<
+      {
+        pool: AlgoFocusedPool;
+        algo: Algorithm;
+      } | {
+        pool: CoinFocusedPool;
+        coin: DigitalCurrency;
+      }
+    >,
+  };
   'pool-wallet': PoolWallets;
   'rig-profile': {
     [profileUuid: string]: RigProfile;
@@ -183,6 +204,23 @@ export type PoolCurrent = AlgoPoolCurrent | CoinPoolCurrent;
 export function isCoinPoolCurrent(current: PoolCurrent): current is CoinPoolCurrent {
   // tslint:disable-next-line:no-any
   return (current as any).coin != null;
+}
+
+export function isAlgoPoolCurrent(current: PoolCurrent): current is AlgoPoolCurrent {
+  // tslint:disable-next-line:no-any
+  return (current as any).coin == null;
+}
+
+export function isCoinPoolBookmark(
+  bm: UserProfile['bookmarks']['pools'][0],
+): bm is { pool: CoinFocusedPool; coin: DigitalCurrency} {
+  return isCoinFocusedPool(bm.pool);
+}
+
+export function isAlgoPoolBookmark(
+  bm: UserProfile['bookmarks']['pools'][0],
+): bm is { pool: AlgoFocusedPool; algo: Algorithm } {
+  return isAlgoFocusedPool(bm.pool);
 }
 
 export interface Schema {

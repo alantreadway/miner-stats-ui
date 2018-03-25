@@ -12,6 +12,7 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/first';
 import 'rxjs/add/operator/publishReplay';
 import 'rxjs/add/operator/startWith';
+import 'rxjs/add/operator/take';
 
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
